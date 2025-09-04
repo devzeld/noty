@@ -1,7 +1,8 @@
-package me.zeld.not.model;
+package me.zeld.noty.model;
 
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -14,6 +15,16 @@ public class NoteService {
 
     public List<NoteEntity> findAll() {
         return repo.findAll();
+    }
+
+    public List<NoteEntity> findByTitle(String title) {
+        List<NoteEntity> temp = new ArrayList<>();
+        for (NoteEntity note : findAll()) {
+            if (note.getTitle().contains(title)) {
+                temp.add(note);
+            }
+        }
+        return temp;
     }
 
     public NoteEntity findById(String id) {

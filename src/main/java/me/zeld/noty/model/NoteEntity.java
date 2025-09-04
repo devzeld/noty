@@ -1,4 +1,4 @@
-package me.zeld.not.model;
+package me.zeld.noty.model;
 
 
 import lombok.*;
@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 public class NoteEntity {
     @Id
     private String id;
-
     private String title;
     private String content;
     @CreatedDate

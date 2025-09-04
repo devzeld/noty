@@ -1,4 +1,4 @@
-package me.zeld.not;
+package me.zeld.noty;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

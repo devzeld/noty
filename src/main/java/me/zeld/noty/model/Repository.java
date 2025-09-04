@@ -1,4 +1,4 @@
-package me.zeld.not.model;
+package me.zeld.noty.model;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 

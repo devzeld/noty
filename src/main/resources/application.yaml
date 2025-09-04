@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: "noty"
+  data:
+    mongodb:
+      uri: "mongodb://localhost:27017/notes-db"
+
+server:
+  port: 8083
+
+logging:
+  level:
+    me.zeld.noty: debug
+    org:
+      springframework:
+        data:
+          mongodb: debug
+      mongodb:
+        driver: info
+  file:
+    name: "noty.log"
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
