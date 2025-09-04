@@ -4,6 +4,7 @@ package me.zeld.noty.controller;
 import lombok.extern.slf4j.Slf4j;
 import me.zeld.noty.model.NoteEntity;
 import me.zeld.noty.model.NoteService;
+import org.bson.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -39,8 +40,8 @@ public class NoteController {
     }
 
     @GetMapping("/id")
-    public NoteEntity getNoteById(@RequestBody String id) {
-        return service.findById(id);
+    public NoteEntity getNoteById(@RequestBody JsonObject id) {
+        return service.findById(id.get());
     }
 
     @PostMapping
