@@ -18,5 +18,4 @@ public class NoteEntity {
     private LocalDateTime createdAt;
     @LastModifiedDate
     private LocalDateTime updatedAt;
-
 }

@@ -1,5 +1,7 @@
-package me.zeld.noty.model;
+package me.zeld.noty.service;
 
+import me.zeld.noty.model.NoteEntity;
+import me.zeld.noty.repository.Repository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

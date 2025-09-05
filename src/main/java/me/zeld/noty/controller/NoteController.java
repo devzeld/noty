@@ -1,10 +1,8 @@
 package me.zeld.noty.controller;
 
-
-import lombok.extern.slf4j.Slf4j;
 import me.zeld.noty.model.NoteEntity;
-import me.zeld.noty.model.NoteService;
-import org.bson.json.JsonObject;
+import me.zeld.noty.service.NoteService;
+import me.zeld.noty.model.RequestEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +11,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/notes")
-@Slf4j
 public class NoteController {
 
     private static final Logger log = LoggerFactory.getLogger(NoteController.class);
@@ -32,16 +29,16 @@ public class NoteController {
     }
 
     @GetMapping("/title")
-    public List<NoteEntity> getNoteByTitle(@RequestBody String title) {
-        log.info("Collecting notes with title: {}", title);
-        List<NoteEntity> noteList = service.findByTitle(title);
-        log.debug("Founded notes that contains '{}': {}", title, noteList.size());
+    public List<NoteEntity> getNoteByTitle(@RequestBody RequestEntity requestEntity) {
+        log.info("Collecting notes with title: {}", requestEntity.getTitle());
+        List<NoteEntity> noteList = service.findByTitle(requestEntity.getTitle());
+        log.debug("Founded notes that contains '{}': {}", requestEntity.getTitle(), noteList.size());
         return noteList;
     }
 
     @GetMapping("/id")
-    public NoteEntity getNoteById(@RequestBody JsonObject id) {
-        return service.findById(id.get());
+    public NoteEntity getNoteById(@RequestBody RequestEntity requestEntity) {
+        return service.findById(requestEntity.getId());
     }
 
     @PostMapping
@@ -52,9 +49,9 @@ public class NoteController {
         return savedNote;
     }
 
-    @PutMapping("/{id}")
-    public NoteEntity updateNote(@PathVariable String id, @RequestBody NoteEntity newNote) {
-        NoteEntity existing = service.findById(id);
+    @PutMapping("/id")
+    public NoteEntity updateNote(@RequestBody NoteEntity newNote) {
+        NoteEntity existing = service.findById(newNote.getId());
         if (existing != null) {
             existing.setTitle(newNote.getTitle());
             existing.setContent(newNote.getContent());
@@ -63,8 +60,8 @@ public class NoteController {
         return null;
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteNote(@PathVariable String id) {
-        service.delete(id);
+    @DeleteMapping("/id")
+    public void deleteNote(@RequestBody RequestEntity requestEntity) {
+        service.delete(requestEntity.getId());
     }
 }
