@@ -4,7 +4,11 @@ spring:
   data:
     mongodb:
       uri: "mongodb://localhost:27017/notes-db"
-
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
 server:
   port: 8083
 
