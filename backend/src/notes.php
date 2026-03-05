@@ -1,6 +1,6 @@
 <?php
-require "./backend/config/connect.php";
-require "./backend/config/cors.php";
+require "../config/connect.php";
+require "../config/cors.php";
 
 $db = DBHandler::getPDO();
 
