@@ -1,14 +1,15 @@
 <?php
 require "../config/connect.php";
 require "../config/cors.php";
+require "/middleware/auth.php";
 
 $db = DBHandler::getPDO();
+$user = Auth::getInstance()->user();
 
 $method = $_SERVER["REQUEST_METHOD"];
 
 switch ($method) {
     case "GET":
-
         echo json_encode(["data" => 'get']);
         break;
     case "POST":
