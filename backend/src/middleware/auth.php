@@ -2,15 +2,13 @@
 require "../config/connect.php";
 require "../config/cors.php";
 
-class Auth
-{
+class Auth {
     private static $instance = null;
     private $user = null;
 
     private $db = DBHandler::getPDO();
 
-    private function __construct()
-    {
+    private function __construct() {
         $headers = getallheaders();
         $authHeader = $headers['Authorization'] ?? '';
 
@@ -43,21 +41,18 @@ class Auth
         }
     }
 
-    public static function getInstance()
-    {
+    public static function getInstance() {
         if (self::$instance == null) {
             self::$instance = new Auth();
         }
         return self::$instance;
     }
 
-    public function user()
-    {
+    public function user() {
         return $this->user;
     }
 
-    public function check()
-    {
+    public function check() {
         return $this->user !== null;
     }
 }
