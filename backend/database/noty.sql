@@ -10,7 +10,7 @@ CREATE TABLE accounts (
     deleted_at DATETIME
 );
 
-CREATE TABLE sessions(
+CREATE TABLE sessions (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     token VARCHAR(255),
