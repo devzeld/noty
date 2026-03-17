@@ -1,18 +1,5 @@
 <?php
 
-/**
- * POST /auth/register
- *
- * Body (JSON):
- *   { "username": "...", "email": "...", "password": "..." }
- *
- * Responses:
- *   201 { "message": "Account creato", "user_id": <int> }
- *   400 { "error": "..." }
- *   409 { "error": "Username o email già in uso" }
- *   500 { "error": "Errore interno" }
- */
-
 require "../../config/connect.php";
 require "../../config/cors.php";
 
@@ -24,10 +11,9 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 
 $body = json_decode(file_get_contents("php://input"), true);
 
-// ── Validation ──────────────────────────────────────────────
 $username = trim($body["username"] ?? "");
-$email    = trim($body["email"]    ?? "");
-$password =      $body["password"] ?? "";
+$email = trim($body["email"]    ?? "");
+$password = $body["password"] ?? "";
 
 if ($username === "" || $email === "" || $password === "") {
     http_response_code(400);
@@ -53,10 +39,8 @@ if (strlen($password) < 8) {
     exit;
 }
 
-// ── DB ──────────────────────────────────────────────────────
 $db = DBHandler::getPDO();
 
-// Duplicate check
 $stmt = $db->prepare(
     "SELECT id FROM accounts WHERE username = ? OR email = ? LIMIT 1"
 );
@@ -68,7 +52,6 @@ if ($stmt->fetch()) {
     exit;
 }
 
-// Hash & insert
 $hash = password_hash($password, PASSWORD_BCRYPT, ["cost" => 12]);
 
 try {

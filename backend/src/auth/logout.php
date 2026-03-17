@@ -1,15 +1,4 @@
 <?php
-
-/**
- * POST /auth/logout
- *
- * Header: Authorization: Bearer <token>
- *
- * Responses:
- *   200 { "message": "Logout effettuato" }
- *   401 { "error": "Token mancante o non valido" }
- */
-
 require "../../config/connect.php";
 require "../../config/cors.php";
 
@@ -19,7 +8,6 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     exit;
 }
 
-// ── Extract Bearer token ─────────────────────────────────────
 $headers    = getallheaders();
 $authHeader = $headers["Authorization"] ?? $headers["authorization"] ?? "";
 
@@ -32,7 +20,6 @@ if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
 $token = $matches[1];
 $db    = DBHandler::getPDO();
 
-// Verify token exists and is not expired
 $stmt = $db->prepare(
     "SELECT id FROM sessions WHERE token = ? AND expires_at > NOW() LIMIT 1"
 );
@@ -44,7 +31,8 @@ if (!$stmt->fetch()) {
     exit;
 }
 
-// ── Invalidate session ───────────────────────────────────────
-$db->prepare("DELETE FROM sessions WHERE token = ?")->execute([$token]);
+$db->prepare(
+    "DELETE FROM sessions WHERE token = ?"
+)->execute([$token]);
 
 echo json_encode(["message" => "Logout effettuato con successo"]);

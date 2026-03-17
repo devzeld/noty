@@ -1,19 +1,4 @@
 <?php
-
-/**
- * POST /auth/refresh
- *
- * Header: Authorization: Bearer <token>
- *
- * Emits a brand-new token and invalidates the old one.
- * Useful for sliding-session UX without asking the user to re-login.
- *
- * Responses:
- *   200 { "token": "...", "expires_at": "..." }
- *   401 { "error": "..." }
- *   500 { "error": "Errore interno" }
- */
-
 require "../../config/connect.php";
 require "../../config/cors.php";
 
@@ -23,7 +8,6 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     exit;
 }
 
-// ── Extract Bearer token ─────────────────────────────────────
 $headers    = getallheaders();
 $authHeader = $headers["Authorization"] ?? $headers["authorization"] ?? "";
 
@@ -34,9 +18,8 @@ if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
 }
 
 $oldToken = $matches[1];
-$db       = DBHandler::getPDO();
+$db = DBHandler::getPDO();
 
-// ── Validate existing session ────────────────────────────────
 $stmt = $db->prepare(
     "SELECT s.id AS session_id, s.user_id, a.deleted_at
      FROM sessions s
@@ -59,19 +42,16 @@ if ($session["deleted_at"] !== null) {
     exit;
 }
 
-// ── Rotate token ─────────────────────────────────────────────
 $newToken  = bin2hex(random_bytes(32));
 $expiresAt = date("Y-m-d H:i:s", strtotime("+7 days"));
 
 try {
     $db->beginTransaction();
 
-    // Delete old session (rotation – prevents token reuse)
     $db->prepare(
         "DELETE FROM sessions WHERE id = ?"
     )->execute([$session["session_id"]]);
 
-    // Create new session
     $db->prepare(
         "INSERT INTO sessions (user_id, token, expires_at) VALUES (?, ?, ?)"
     )->execute([$session["user_id"], $newToken, $expiresAt]);
@@ -85,6 +65,6 @@ try {
 }
 
 echo json_encode([
-    "token"      => $newToken,
+    "token" => $newToken,
     "expires_at" => $expiresAt,
 ]);

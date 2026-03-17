@@ -8,9 +8,9 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     exit;
 }
 
-$body     = json_decode(file_get_contents("php://input"), true);
-$login    = trim($body["login"]    ?? "");
-$password =      $body["password"] ?? "";
+$body = json_decode(file_get_contents("php://input"), true);
+$login = trim($body["login"]    ?? "");
+$password = $body["password"] ?? "";
 
 if ($login === "" || $password === "") {
     http_response_code(400);
@@ -20,12 +20,11 @@ if ($login === "" || $password === "") {
 
 $db = DBHandler::getPDO();
 
-// Accept username OR email
 $stmt = $db->prepare(
     "SELECT id, username, email, password_hash, deleted_at
-     FROM accounts
-     WHERE (username = ? OR email = ?)
-     LIMIT 1"
+    FROM accounts
+    WHERE (username = ? OR email = ?)
+    LIMIT 1"
 );
 $stmt->execute([$login, $login]);
 $account = $stmt->fetch();
@@ -42,7 +41,7 @@ if (!$account || !password_verify($password, $account["password_hash"])) {
     exit;
 }
 
-$token     = bin2hex(random_bytes(32));
+$token = bin2hex(random_bytes(32));
 $expiresAt = date("Y-m-d H:i:s", strtotime("+7 days"));
 
 try {
@@ -53,6 +52,7 @@ try {
     $stmt = $db->prepare(
         "INSERT INTO sessions (user_id, token, expires_at) VALUES (?, ?, ?)"
     );
+
     $stmt->execute([$account["id"], $token, $expiresAt]);
 } catch (PDOException $e) {
     http_response_code(500);
@@ -68,11 +68,11 @@ if (password_needs_rehash($account["password_hash"], PASSWORD_BCRYPT, ["cost" =>
 }
 
 echo json_encode([
-    "token"      => $token,
+    "token" => $token,
     "expires_at" => $expiresAt,
-    "user"       => [
-        "id"       => (int) $account["id"],
+    "user" => [
+        "id" => (int) $account["id"],
         "username" => $account["username"],
-        "email"    => $account["email"],
+        "email" => $account["email"],
     ],
 ]);
