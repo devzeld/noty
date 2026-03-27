@@ -8,7 +8,7 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     exit;
 }
 
-$headers    = getallheaders();
+$headers = getallheaders();
 $authHeader = $headers["Authorization"] ?? $headers["authorization"] ?? "";
 
 if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
