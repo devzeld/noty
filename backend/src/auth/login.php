@@ -42,7 +42,8 @@ if (!$account || !password_verify($password, $account["password_hash"])) {
 }
 
 $token = bin2hex(random_bytes(32));
-$expiresAt = date("Y-m-d H:i:s", strtotime("+7 days"));
+$expiresAtTimestamp = strtotime("+7 days");
+$expiresAt = date("Y-m-d H:i:s", $expiresAtTimestamp);
 
 try {
     $db->prepare(
@@ -66,6 +67,14 @@ if (password_needs_rehash($account["password_hash"], PASSWORD_BCRYPT, ["cost" =>
         "UPDATE accounts SET password_hash = ? WHERE id = ?"
     )->execute([$newHash, $account["id"]]);
 }
+
+setcookie("token", $token, [
+    "expires"  => $expiresAtTimestamp,
+    "path"     => "/",
+    "secure"   => true,
+    "httponly" => true,
+    "samesite" => "None",
+]);
 
 echo json_encode([
     "token" => $token,

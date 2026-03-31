@@ -35,4 +35,16 @@ $db->prepare(
     "DELETE FROM sessions WHERE token = ?"
 )->execute([$token]);
 
+setcookie(
+    "token",
+    "",
+    [
+        "expires" => time() - 3600,
+        "path" => "/",
+        "secure" => true,
+        "httponly" => true,
+        "samesite" => "None",
+    ]
+);
+
 echo json_encode(["message" => "Logout effettuato con successo"]);
