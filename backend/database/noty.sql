@@ -65,6 +65,7 @@ CREATE TABLE versions (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     doc_id INT NOT NULL,
     user_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL DEFAULT '',
     content LONGTEXT NOT NULL,
     version_number INT NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

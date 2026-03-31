@@ -1,7 +1,7 @@
 <?php
 require "../../config/connect.php";
 require "../../config/cors.php";
-require "../../config/Auth.php";
+require "../../config/authentication.php";
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     http_response_code(405);
