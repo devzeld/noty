@@ -1,20 +1,22 @@
 <?php
-class DBHandler {
+class DBHandler
+{
     private static $pdo;
 
-    private function __construct() {
-    }
+    private function __construct() {}
 
-    public static function getPDO(){
-        if(self::$pdo == null){
+    public static function getPDO()
+    {
+        if (self::$pdo == null) {
             self::connect_database();
         }
-        return self::$pdo;        
+        return self::$pdo;
     }
 
-    private static function connect_database() {
-        define('USER', 'root');
-        define('PASSWORD', '');
+    private static function connect_database()
+    {
+        $user = 'root';
+        $password = '';
 
         try {
             $connection_string = 'mysql:host=localhost;dbname=noty;charset=utf8';
@@ -22,11 +24,9 @@ class DBHandler {
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
             );
-            self::$pdo = new PDO($connection_string, USER, PASSWORD, $connection_array);
-        }
-        catch(PDOException $e) {
+            self::$pdo = new PDO($connection_string, $user, $password, $connection_array);
+        } catch (PDOException $e) {
             self::$pdo = null;
         }
     }
 }
-?>

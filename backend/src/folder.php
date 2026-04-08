@@ -154,6 +154,10 @@ switch ($method) {
         requireFolder($db, $folderId, $userId);
 
         $db->prepare(
+            "UPDATE documents SET folder_id = NULL WHERE folder_id = ?"
+        )->execute([$folderId]);
+
+        $db->prepare(
             "UPDATE folders SET deleted_at = NOW() WHERE id = ?"
         )->execute([$folderId]);
 

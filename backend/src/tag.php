@@ -12,7 +12,7 @@ $tagId  = isset($_GET["id"]) ? (int) $_GET["id"] : null;
 
 function requireTag(PDO $db, int $tagId, int $userId): array
 {
-    $stmt = $db->prepare("SELECT * FROM tags WHERE id = ? AND user_id = ?");
+    $stmt = $db->prepare("SELECT * FROM tags WHERE id = ? AND user_id = ? AND deleted_at IS NULL");
     $stmt->execute([$tagId, $userId]);
     $tag = $stmt->fetch();
 
@@ -130,7 +130,7 @@ switch ($method) {
 
         requireTag($db, $tagId, $userId);
 
-        $db->prepare("DELETE FROM tags WHERE id = ?")->execute([$tagId]);
+        $db->prepare("UPDATE tags SET deleted_at = NOW() WHERE id = ?")->execute([$tagId]);
 
         Logger::write($userId, "tag_deleted", null, null, $tagId);
 
