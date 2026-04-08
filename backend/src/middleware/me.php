@@ -1,8 +1,5 @@
 <?php
-
-require "../../config/connect.php";
-require "../../config/cors.php";
-require "../../config/Auth.php";
+require_once __DIR__ . "/../middleware/bootstrap_auth.php";
 
 $auth = Auth::getInstance();
 $auth->requireAuth();
