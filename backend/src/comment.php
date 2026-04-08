@@ -11,7 +11,6 @@ $method    = $_SERVER["REQUEST_METHOD"];
 $commentId = isset($_GET["id"])     ? (int) $_GET["id"]     : null;
 $docId     = isset($_GET["doc_id"]) ? (int) $_GET["doc_id"] : null;
 
-// ─── Helper: verifica permesso sul documento ──────────────────────────────────
 function requireDocAccess(PDO $db, int $docId, int $userId, string $minRole = "viewer"): void
 {
     $roles = ["viewer" => 0, "editor" => 1, "owner" => 2];
@@ -38,7 +37,6 @@ function requireDocAccess(PDO $db, int $docId, int $userId, string $minRole = "v
     }
 }
 
-// ─── Helper: verifica proprietà commento ──────────────────────────────────────
 function requireComment(PDO $db, int $commentId, int $userId): array
 {
     $stmt = $db->prepare(
@@ -62,7 +60,6 @@ function requireComment(PDO $db, int $commentId, int $userId): array
 
 switch ($method) {
 
-    // ── GET /comment.php?doc_id=N  → commenti del documento (ad albero)
     case "GET":
         if (!$docId) {
             http_response_code(400);
@@ -81,7 +78,6 @@ switch ($method) {
         $stmt->execute([$docId]);
         $rows = $stmt->fetchAll();
 
-        // Costruisce la struttura ad albero
         $map  = [];
         $tree = [];
         foreach ($rows as $row) {
@@ -99,7 +95,6 @@ switch ($method) {
         echo json_encode(["data" => $tree]);
         break;
 
-    // ── POST /comment.php  → crea commento (o reply)
     case "POST":
         $body    = json_decode(file_get_contents("php://input"), true);
         $docId   = isset($body["doc_id"]) ? (int) $body["doc_id"] : null;
@@ -114,7 +109,6 @@ switch ($method) {
 
         requireDocAccess($db, $docId, $userId);
 
-        // Verifica che il commento padre esista e appartenga allo stesso documento
         if ($parentId) {
             $stmt = $db->prepare(
                 "SELECT id FROM comments WHERE id = ? AND doc_id = ? AND deleted_at IS NULL"
@@ -139,7 +133,6 @@ switch ($method) {
         echo json_encode(["message" => "Commento aggiunto", "id" => $newId]);
         break;
 
-    // ── PUT /comment.php?id=N  → modifica il proprio commento
     case "PUT":
         if (!$commentId) {
             http_response_code(400);
@@ -162,7 +155,6 @@ switch ($method) {
         echo json_encode(["message" => "Commento aggiornato"]);
         break;
 
-    // ── DELETE /comment.php?id=N  → soft delete (solo autore o owner del documento)
     case "DELETE":
         if (!$commentId) {
             http_response_code(400);
@@ -183,7 +175,6 @@ switch ($method) {
             exit(json_encode(["error" => "Commento non trovato"]));
         }
 
-        // Può eliminare: autore del commento oppure owner del documento
         if ((int) $comment["user_id"] !== $userId && (int) $comment["doc_owner"] !== $userId) {
             http_response_code(403);
             exit(json_encode(["error" => "Non autorizzato"]));

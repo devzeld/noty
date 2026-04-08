@@ -9,10 +9,8 @@ $userId = (int) $user["id"];
 $db = DBHandler::getPDO();
 $method = $_SERVER["REQUEST_METHOD"];
 
-// Estrae l'id del documento dall'URL: /document.php?id=5
 $docId = isset($_GET["id"]) ? (int) $_GET["id"] : null;
 
-// ─── Helper: controlla che l'utente abbia un ruolo minimo sul documento ──────
 function requireDocPermission(PDO $db, int $docId, int $userId, string $minRole = "viewer"): array
 {
     $roles = ["viewer" => 0, "editor" => 1, "owner" => 2];
@@ -42,7 +40,6 @@ function requireDocPermission(PDO $db, int $docId, int $userId, string $minRole 
     return $doc;
 }
 
-// ─── Helper: crea una versione del documento ──────────────────────────────────
 function createVersion(PDO $db, int $docId, int $userId, string $title, string $content): void
 {
     $stmt = $db->prepare(
@@ -59,14 +56,10 @@ function createVersion(PDO $db, int $docId, int $userId, string $title, string $
 }
 
 switch ($method) {
-
-    // ── GET /document.php          → lista documenti dell'utente (propri + condivisi)
-    // ── GET /document.php?id=N     → singolo documento
     case "GET":
         if ($docId) {
             $doc = requireDocPermission($db, $docId, $userId, "viewer");
 
-            // Tags associati
             $stmt = $db->prepare(
                 "SELECT t.id, t.name, t.color
                  FROM tags t
@@ -78,7 +71,6 @@ switch ($method) {
 
             echo json_encode(["data" => $doc]);
         } else {
-            // Documenti posseduti + condivisi con me
             $folderId = isset($_GET["folder_id"]) ? (int) $_GET["folder_id"] : null;
             $search   = isset($_GET["q"]) ? "%" . trim($_GET["q"]) . "%" : null;
 
@@ -110,15 +102,13 @@ switch ($method) {
         }
         break;
 
-    // ── POST /document.php  → crea documento
     case "POST":
         $body    = json_decode(file_get_contents("php://input"), true);
-        $title   = trim($body["title"] ?? "");
+        $title   = trim($body["title"] ?? "Nuova documento");
         $content = $body["content"] ?? "";
         $folderId = isset($body["folder_id"]) ? (int) $body["folder_id"] : null;
         $tagIds  = $body["tag_ids"] ?? [];
 
-        // Verifica cartella (se fornita) appartenga all'utente
         if ($folderId) {
             $stmt = $db->prepare("SELECT id FROM folders WHERE id = ? AND user_id = ? AND deleted_at IS NULL");
             $stmt->execute([$folderId, $userId]);
@@ -134,15 +124,12 @@ switch ($method) {
         $stmt->execute([$userId, $folderId, $title, $content]);
         $newDocId = (int) $db->lastInsertId();
 
-        // Permesso owner
         $db->prepare(
             "INSERT INTO doc_permissions (doc_id, user_id, role) VALUES (?, ?, 'owner')"
         )->execute([$newDocId, $userId]);
 
-        // Prima versione
         createVersion($db, $newDocId, $userId, $title, $content);
 
-        // Tags
         if (!empty($tagIds)) {
             $ins = $db->prepare("INSERT IGNORE INTO doc_tags (doc_id, tag_id) VALUES (?, ?)");
             foreach ($tagIds as $tid) {
@@ -156,7 +143,6 @@ switch ($method) {
         echo json_encode(["message" => "Documento creato", "id" => $newDocId]);
         break;
 
-    // ── PUT /document.php?id=N  → aggiorna documento (solo editor/owner)
     case "PUT":
         if (!$docId) {
             http_response_code(400);
@@ -171,7 +157,6 @@ switch ($method) {
         $folderId = array_key_exists("folder_id", $body) ? ($body["folder_id"] ? (int) $body["folder_id"] : null) : $doc["folder_id"];
         $tagIds   = $body["tag_ids"] ?? null;
 
-        // Salva versione solo se il contenuto è cambiato
         if ($content !== $doc["content"] || $title !== $doc["title"]) {
             createVersion($db, $docId, $userId, $doc["title"], $doc["content"]);
         }
@@ -181,7 +166,6 @@ switch ($method) {
              WHERE id = ?"
         )->execute([$title, $content, $folderId, $docId]);
 
-        // Aggiorna tags se forniti
         if ($tagIds !== null) {
             $db->prepare("DELETE FROM doc_tags WHERE doc_id = ?")->execute([$docId]);
             if (!empty($tagIds)) {
@@ -197,7 +181,6 @@ switch ($method) {
         echo json_encode(["message" => "Documento aggiornato"]);
         break;
 
-    // ── DELETE /document.php?id=N  → soft delete (solo owner)
     case "DELETE":
         if (!$docId) {
             http_response_code(400);

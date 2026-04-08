@@ -25,8 +25,6 @@ function requireTag(PDO $db, int $tagId, int $userId): array
 
 switch ($method) {
 
-    // ── GET /tag.php          → tutti i tag dell'utente
-    // ── GET /tag.php?id=N     → tag singolo con documenti associati
     case "GET":
         if ($tagId) {
             $tag = requireTag($db, $tagId, $userId);
@@ -56,10 +54,9 @@ switch ($method) {
         }
         break;
 
-    // ── POST /tag.php  → crea tag
     case "POST":
-        $body  = json_decode(file_get_contents("php://input"), true);
-        $name  = trim($body["name"] ?? "");
+        $body = json_decode(file_get_contents("php://input"), true);
+        $name = trim($body["name"] ?? "");
         $color = trim($body["color"] ?? "#6b8fa8");
 
         if (empty($name)) {
@@ -72,7 +69,6 @@ switch ($method) {
             exit(json_encode(["error" => "Colore non valido (formato: #rrggbb)"]));
         }
 
-        // Nome univoco per utente
         $stmt = $db->prepare("SELECT id FROM tags WHERE user_id = ? AND name = ?");
         $stmt->execute([$userId, $name]);
         if ($stmt->fetch()) {
@@ -90,16 +86,15 @@ switch ($method) {
         echo json_encode(["message" => "Tag creato", "id" => $newId]);
         break;
 
-    // ── PUT /tag.php?id=N  → modifica tag
     case "PUT":
         if (!$tagId) {
             http_response_code(400);
             exit(json_encode(["error" => "ID tag obbligatorio"]));
         }
 
-        $tag   = requireTag($db, $tagId, $userId);
-        $body  = json_decode(file_get_contents("php://input"), true);
-        $name  = isset($body["name"])  ? trim($body["name"])  : $tag["name"];
+        $tag = requireTag($db, $tagId, $userId);
+        $body = json_decode(file_get_contents("php://input"), true);
+        $name = isset($body["name"])  ? trim($body["name"])  : $tag["name"];
         $color = isset($body["color"]) ? trim($body["color"]) : $tag["color"];
 
         if (empty($name)) {
@@ -121,7 +116,6 @@ switch ($method) {
         echo json_encode(["message" => "Tag aggiornato"]);
         break;
 
-    // ── DELETE /tag.php?id=N  → elimina tag (la cascade rimuove i doc_tags)
     case "DELETE":
         if (!$tagId) {
             http_response_code(400);

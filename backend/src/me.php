@@ -10,7 +10,7 @@ echo json_encode([
     "user" => [
         "id" => (int) $user["id"],
         "username" => $user["username"],
-        "email"    => $user["email"],
+        "email" => $user["email"],
     ],
     "token" => $auth->getToken()
 ]);

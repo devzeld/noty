@@ -1,8 +1,8 @@
 <?php
 $allowed_origins = [
     'http://localhost:3000',
-    'http://localhost:3001',
-    'https://noty.zeld.space'
+    'http://localhost:3000',
+    'https://noty.zeld.space' // questo è il mio dominio
 ];
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';

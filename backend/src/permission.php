@@ -10,7 +10,6 @@ $db = DBHandler::getPDO();
 $method = $_SERVER["REQUEST_METHOD"];
 $docId  = isset($_GET["doc_id"]) ? (int) $_GET["doc_id"] : null;
 
-// Solo l'owner può gestire i permessi
 function requireOwner(PDO $db, int $docId, int $userId): void
 {
     $stmt = $db->prepare(
@@ -25,7 +24,6 @@ function requireOwner(PDO $db, int $docId, int $userId): void
 
 switch ($method) {
 
-    // ── GET /permission.php?doc_id=N  → lista collaboratori del documento
     case "GET":
         if (!$docId) {
             http_response_code(400);
@@ -46,12 +44,11 @@ switch ($method) {
         echo json_encode(["data" => $stmt->fetchAll()]);
         break;
 
-    // ── POST /permission.php  → aggiunge un collaboratore (per username o email)
     case "POST":
-        $body     = json_decode(file_get_contents("php://input"), true);
-        $docId    = isset($body["doc_id"]) ? (int) $body["doc_id"] : null;
-        $role     = $body["role"] ?? "viewer";
-        $login    = trim($body["login"] ?? ""); // username o email
+        $body = json_decode(file_get_contents("php://input"), true);
+        $docId = isset($body["doc_id"]) ? (int) $body["doc_id"] : null;
+        $role = $body["role"] ?? "viewer";
+        $login = trim($body["login"] ?? ""); // username o email
 
         if (!$docId || empty($login)) {
             http_response_code(400);
@@ -65,7 +62,6 @@ switch ($method) {
 
         requireOwner($db, $docId, $userId);
 
-        // Cerca l'utente da invitare
         $stmt = $db->prepare(
             "SELECT id FROM accounts WHERE (username = ? OR email = ?) AND deleted_at IS NULL LIMIT 1"
         );
@@ -84,7 +80,6 @@ switch ($method) {
             exit(json_encode(["error" => "Non puoi condividere il documento con te stesso"]));
         }
 
-        // Upsert: se esiste già aggiorna il ruolo
         $stmt = $db->prepare(
             "INSERT INTO doc_permissions (doc_id, user_id, role)
              VALUES (?, ?, ?)
@@ -98,7 +93,6 @@ switch ($method) {
         echo json_encode(["message" => "Permesso assegnato"]);
         break;
 
-    // ── PUT /permission.php?doc_id=N  → cambia ruolo a un collaboratore
     case "PUT":
         if (!$docId) {
             http_response_code(400);
@@ -107,9 +101,9 @@ switch ($method) {
 
         requireOwner($db, $docId, $userId);
 
-        $body     = json_decode(file_get_contents("php://input"), true);
+        $body = json_decode(file_get_contents("php://input"), true);
         $targetId = isset($body["user_id"]) ? (int) $body["user_id"] : null;
-        $role     = $body["role"] ?? null;
+        $role = $body["role"] ?? null;
 
         if (!$targetId || !$role) {
             http_response_code(400);
@@ -135,7 +129,6 @@ switch ($method) {
         echo json_encode(["message" => "Ruolo aggiornato"]);
         break;
 
-    // ── DELETE /permission.php?doc_id=N  → rimuove un collaboratore
     case "DELETE":
         if (!$docId) {
             http_response_code(400);
@@ -144,7 +137,7 @@ switch ($method) {
 
         requireOwner($db, $docId, $userId);
 
-        $body     = json_decode(file_get_contents("php://input"), true);
+        $body = json_decode(file_get_contents("php://input"), true);
         $targetId = isset($body["user_id"]) ? (int) $body["user_id"] : null;
 
         if (!$targetId) {

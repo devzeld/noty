@@ -43,13 +43,10 @@ function wouldCreateCycle(PDO $db, int $folderId, int $newParentId): bool
 
 switch ($method) {
 
-    // ── GET /folder.php             → cartelle radice dell'utente
-    // ── GET /folder.php?id=N        → sottocartelle + documenti dentro la cartella N
     case "GET":
         if ($folderId) {
             requireFolder($db, $folderId, $userId);
 
-            // Sottocartelle
             $stmt = $db->prepare(
                 "SELECT * FROM folders WHERE parent_folder_id = ? AND user_id = ? AND deleted_at IS NULL
                  ORDER BY name ASC"
@@ -57,7 +54,6 @@ switch ($method) {
             $stmt->execute([$folderId, $userId]);
             $subfolders = $stmt->fetchAll();
 
-            // Documenti nella cartella
             $stmt = $db->prepare(
                 "SELECT id, title, updated_at FROM documents
                  WHERE folder_id = ? AND owner_id = ? AND deleted_at IS NULL
@@ -68,7 +64,6 @@ switch ($method) {
 
             echo json_encode(["data" => ["folders" => $subfolders, "documents" => $docs]]);
         } else {
-            // Cartelle radice (senza parent)
             $stmt = $db->prepare(
                 "SELECT * FROM folders WHERE parent_folder_id IS NULL AND user_id = ? AND deleted_at IS NULL
                  ORDER BY name ASC"
@@ -78,7 +73,6 @@ switch ($method) {
         }
         break;
 
-    // ── POST /folder.php  → crea cartella
     case "POST":
         $body     = json_decode(file_get_contents("php://input"), true);
         $name     = trim($body["name"] ?? "");
@@ -105,7 +99,6 @@ switch ($method) {
         echo json_encode(["message" => "Cartella creata", "id" => $newId]);
         break;
 
-    // ── PUT /folder.php?id=N  → rinomina o sposta cartella
     case "PUT":
         if (!$folderId) {
             http_response_code(400);
@@ -125,7 +118,6 @@ switch ($method) {
             exit(json_encode(["error" => "Il nome non può essere vuoto"]));
         }
 
-        // Impedisce di spostare una cartella dentro se stessa
         if ($parentId && wouldCreateCycle($db, $folderId, $parentId)) {
             http_response_code(400);
             exit(json_encode(["error" => "Impossibile spostare una cartella dentro se stessa"]));
@@ -144,7 +136,6 @@ switch ($method) {
         echo json_encode(["message" => "Cartella aggiornata"]);
         break;
 
-    // ── DELETE /folder.php?id=N  → soft delete (i documenti dentro rimangono, folder_id → NULL)
     case "DELETE":
         if (!$folderId) {
             http_response_code(400);

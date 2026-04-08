@@ -8,10 +8,9 @@ $userId = (int) $user["id"];
 
 $db = DBHandler::getPDO();
 $method = $_SERVER["REQUEST_METHOD"];
-$docId  = isset($_GET["doc_id"])    ? (int) $_GET["doc_id"]    : null;
-$verId  = isset($_GET["version_id"]) ? (int) $_GET["version_id"] : null;
+$docId = isset($_GET["doc_id"]) ? (int) $_GET["doc_id"] : null;
+$verId = isset($_GET["version_id"]) ? (int) $_GET["version_id"] : null;
 
-// Verifica accesso al documento (almeno viewer)
 function requireDocAccess(PDO $db, int $docId, int $userId, string $minRole = "viewer"): array
 {
     $roles = ["viewer" => 0, "editor" => 1, "owner" => 2];
@@ -40,8 +39,6 @@ function requireDocAccess(PDO $db, int $docId, int $userId, string $minRole = "v
 
 switch ($method) {
 
-    // ── GET /version.php?doc_id=N              → lista versioni del documento
-    // ── GET /version.php?doc_id=N&version_id=M → contenuto di una versione specifica
     case "GET":
         if (!$docId) {
             http_response_code(400);
@@ -67,7 +64,6 @@ switch ($method) {
 
             echo json_encode(["data" => $version]);
         } else {
-            // Lista senza content (troppo pesante)
             $stmt = $db->prepare(
                 "SELECT v.id, v.version_number, v.title, v.created_at, a.username
                  FROM versions v
@@ -80,9 +76,8 @@ switch ($method) {
         }
         break;
 
-    // ── POST /version.php  → ripristina una versione (crea nuova versione con il vecchio contenuto)
     case "POST":
-        $body  = json_decode(file_get_contents("php://input"), true);
+        $body = json_decode(file_get_contents("php://input"), true);
         $docId = isset($body["doc_id"])     ? (int) $body["doc_id"]     : null;
         $verId = isset($body["version_id"]) ? (int) $body["version_id"] : null;
 
@@ -104,7 +99,6 @@ switch ($method) {
             exit(json_encode(["error" => "Versione non trovata"]));
         }
 
-        // Salva lo stato attuale come nuova versione prima di sovrascrivere
         $stmt = $db->prepare("SELECT title, content FROM documents WHERE id = ?");
         $stmt->execute([$docId]);
         $current = $stmt->fetch();
@@ -115,13 +109,11 @@ switch ($method) {
         $stmt->execute([$docId]);
         $nextVer = (int) $stmt->fetchColumn();
 
-        // Versione "snapshot" dello stato attuale
         $db->prepare(
             "INSERT INTO versions (doc_id, user_id, title, content, version_number)
              VALUES (?, ?, ?, ?, ?)"
         )->execute([$docId, $userId, $current["title"], $current["content"], $nextVer]);
 
-        // Ripristino
         $db->prepare(
             "UPDATE documents SET title = ?, content = ?, updated_at = NOW() WHERE id = ?"
         )->execute([$version["title"], $version["content"], $docId]);
