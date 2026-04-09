@@ -30,8 +30,12 @@ function wouldCreateCycle(PDO $db, int $folderId, int $newParentId): bool
     $current = $newParentId;
     $visited = [];
     while ($current !== null) {
-        if ($current === $folderId) return true;
-        if (in_array($current, $visited)) break;
+        if ($current === $folderId) {
+            return true;
+        }
+        if (in_array($current, $visited)) {
+            break;
+        }
         $visited[] = $current;
         $stmt = $db->prepare("SELECT parent_folder_id FROM folders WHERE id = ?");
         $stmt->execute([$current]);
