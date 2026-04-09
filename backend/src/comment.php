@@ -7,9 +7,9 @@ $user = $auth->user();
 $userId = (int) $user["id"];
 
 $db = DBHandler::getPDO();
-$method    = $_SERVER["REQUEST_METHOD"];
-$commentId = isset($_GET["id"])     ? (int) $_GET["id"]     : null;
-$docId     = isset($_GET["doc_id"]) ? (int) $_GET["doc_id"] : null;
+$method = $_SERVER["REQUEST_METHOD"];
+$commentId = isset($_GET["id"]) ? (int) $_GET["id"] : null;
+$docId = isset($_GET["doc_id"]) ? (int) $_GET["doc_id"] : null;
 
 function requireDocAccess(PDO $db, int $docId, int $userId, string $minRole = "viewer"): void
 {
