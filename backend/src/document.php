@@ -42,17 +42,28 @@ function requireDocPermission(PDO $db, int $docId, int $userId, string $minRole 
 
 function createVersion(PDO $db, int $docId, int $userId, string $title, string $content): void
 {
-    $stmt = $db->prepare(
-        "SELECT COALESCE(MAX(version_number), 0) + 1 AS next FROM versions WHERE doc_id = ?"
-    );
-    $stmt->execute([$docId]);
-    $nextVersion = (int) $stmt->fetchColumn();
+    try {
+        $db->beginTransaction();
+        $stmt = $db->prepare(
+            "SELECT COALESCE(MAX(version_number), 0) + 1 AS next
+             FROM versions
+             WHERE doc_id = ?
+             FOR UPDATE"
+        );
+        $stmt->execute([$docId]);
+        $nextVersion = (int) $stmt->fetchColumn();
 
-    $stmt = $db->prepare(
-        "INSERT INTO versions (doc_id, user_id, title, content, version_number)
-         VALUES (?, ?, ?, ?, ?)"
-    );
-    $stmt->execute([$docId, $userId, $title, $content, $nextVersion]);
+        $stmt = $db->prepare(
+            "INSERT INTO versions (doc_id, user_id, title, content, version_number)
+             VALUES (?, ?, ?, ?, ?)"
+        );
+        $stmt->execute([$docId, $userId, $title, $content, $nextVersion]);
+
+        $db->commit();
+    } catch (Exception $e) {
+        $db->rollBack();
+        throw $e;
+    }
 }
 
 switch ($method) {
