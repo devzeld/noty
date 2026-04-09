@@ -13,11 +13,11 @@ if ($_SERVER["REQUEST_METHOD"] !== "GET") {
     exit(json_encode(["error" => "Metodo non consentito"]));
 }
 
-$docId    = isset($_GET["doc_id"]) ? (int) $_GET["doc_id"] : null;
+$docId = isset($_GET["doc_id"]) ? (int) $_GET["doc_id"] : null;
 $folderId = isset($_GET["folder_id"]) ? (int) $_GET["folder_id"] : null;
-$tagId    = isset($_GET["tag_id"]) ? (int) $_GET["tag_id"] : null;
-$limit    = isset($_GET["limit"]) ? min((int) $_GET["limit"], 100) : 50;
-$offset   = isset($_GET["offset"]) ? (int) $_GET["offset"] : 0;
+$tagId = isset($_GET["tag_id"]) ? (int) $_GET["tag_id"] : null;
+$limit = isset($_GET["limit"]) ? min((int) $_GET["limit"], 100) : 50;
+$offset = isset($_GET["offset"]) ? (int) $_GET["offset"] : 0;
 
 $sql = "SELECT l.*, a.username
         FROM logs l
