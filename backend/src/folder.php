@@ -74,8 +74,8 @@ switch ($method) {
         break;
 
     case "POST":
-        $body     = json_decode(file_get_contents("php://input"), true);
-        $name     = trim($body["name"] ?? "");
+        $body = json_decode(file_get_contents("php://input"), true);
+        $name = trim($body["name"] ?? "");
         $parentId = isset($body["parent_folder_id"]) ? (int) $body["parent_folder_id"] : null;
 
         if (empty($name)) {
@@ -106,9 +106,9 @@ switch ($method) {
         }
 
         $folder = requireFolder($db, $folderId, $userId);
-        $body   = json_decode(file_get_contents("php://input"), true);
+        $body = json_decode(file_get_contents("php://input"), true);
 
-        $name     = isset($body["name"]) ? trim($body["name"]) : $folder["name"];
+        $name = isset($body["name"]) ? trim($body["name"]) : $folder["name"];
         $parentId = array_key_exists("parent_folder_id", $body)
             ? ($body["parent_folder_id"] ? (int) $body["parent_folder_id"] : null)
             : $folder["parent_folder_id"];
