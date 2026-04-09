@@ -31,7 +31,7 @@ function requireDocAccess(PDO $db, int $docId, int $userId, string $minRole = "v
 
     $role = $doc["owner_id"] === $userId ? "owner" : ($doc["role"] ?? null);
 
-    if ($role === null || $roles[$role] < $roles[$minRole]) {
+    if (!isset($roles[$role]) || $roles[$role] < $roles[$minRole])
         http_response_code(403);
         exit(json_encode(["error" => "Accesso non autorizzato"]));
     }
