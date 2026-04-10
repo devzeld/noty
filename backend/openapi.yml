@@ -1,0 +1,1235 @@
+openapi: 3.1.0
+info:
+  title: Noty API
+  version: 1.0.0
+  description: >
+    REST API for Noty — a document management platform with folders, tags,
+    versioning, comments, permissions, and activity logs.
+  contact:
+    url: https://noty.zeld.space
+
+servers:
+  - url: https://noty.zeld.space
+    description: Production
+
+security:
+  - cookieAuth: []
+  - bearerAuth: []
+
+tags:
+  - name: Auth
+    description: Registration, login, logout, token refresh
+  - name: Me
+    description: Current session info
+  - name: Account
+    description: Profile and password management
+  - name: Documents
+    description: CRUD for documents
+  - name: Folders
+    description: CRUD for folders
+  - name: Tags
+    description: CRUD for tags
+  - name: Versions
+    description: Document version history and restore
+  - name: Comments
+    description: Document comments (threaded)
+  - name: Permissions
+    description: Document sharing and access control
+  - name: Logs
+    description: Activity log
+
+# ---------------------------------------------------------------------------
+# Paths
+# ---------------------------------------------------------------------------
+paths:
+
+  # ── Auth ──────────────────────────────────────────────────────────────────
+
+  /src/auth/register.php:
+    post:
+      tags: [Auth]
+      summary: Register a new account
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, password]
+              properties:
+                username:
+                  type: string
+                  minLength: 3
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+      responses:
+        "201":
+          description: Account created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  user_id: { type: integer }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /src/auth/login.php:
+    post:
+      tags: [Auth]
+      summary: Login (username or email + password)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [login, password]
+              properties:
+                login:
+                  type: string
+                  description: Username or email
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /src/auth/logout.php:
+    post:
+      tags: [Auth]
+      summary: Logout (invalidates current session token)
+      responses:
+        "200":
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /src/auth/refresh.php:
+    post:
+      tags: [Auth]
+      summary: Refresh current session token (+7 days)
+      responses:
+        "200":
+          description: New token issued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string }
+                  expires_at: { type: string, format: date-time }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  # ── Me ────────────────────────────────────────────────────────────────────
+
+  /src/me.php:
+    get:
+      tags: [Me]
+      summary: Get current authenticated user and token
+      responses:
+        "200":
+          description: Current user info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: "#/components/schemas/UserBasic"
+                  token:
+                    type: string
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ── Account ───────────────────────────────────────────────────────────────
+
+  /src/account.php:
+    get:
+      tags: [Account]
+      summary: Get own account profile
+      responses:
+        "200":
+          description: Account data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/AccountProfile"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+    put:
+      tags: [Account]
+      summary: Update username and/or email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username: { type: string, minLength: 3 }
+                email: { type: string, format: email }
+      responses:
+        "200":
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+    patch:
+      tags: [Account]
+      summary: Change password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [current_password, new_password]
+              properties:
+                current_password: { type: string }
+                new_password: { type: string, minLength: 8 }
+      responses:
+        "200":
+          description: Password updated; other sessions are revoked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+    delete:
+      tags: [Account]
+      summary: Delete own account (soft delete)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password: { type: string }
+      responses:
+        "200":
+          description: Account deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ── Documents ─────────────────────────────────────────────────────────────
+
+  /src/document.php:
+    get:
+      tags: [Documents]
+      summary: List documents or get a single document
+      parameters:
+        - name: id
+          in: query
+          description: Document ID — if provided, returns a single document with its tags
+          schema: { type: integer }
+        - name: folder_id
+          in: query
+          description: Filter by folder
+          schema: { type: integer }
+        - name: q
+          in: query
+          description: Full-text search on title and content
+          schema: { type: string }
+      responses:
+        "200":
+          description: Document(s)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/DocumentFull"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/DocumentListItem"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    post:
+      tags: [Documents]
+      summary: Create a new document
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  default: "Nuova documento"
+                content:
+                  type: string
+                  default: ""
+                folder_id:
+                  type: integer
+                  nullable: true
+                tag_ids:
+                  type: array
+                  items: { type: integer }
+      responses:
+        "201":
+          description: Document created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  id: { type: integer }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+    put:
+      tags: [Documents]
+      summary: Update a document (requires editor role or higher)
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+                content: { type: string }
+                folder_id:
+                  type: integer
+                  nullable: true
+                tag_ids:
+                  type: array
+                  nullable: true
+                  items: { type: integer }
+      responses:
+        "200":
+          description: Document updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      tags: [Documents]
+      summary: Soft-delete a document (owner only)
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Document deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  # ── Folders ───────────────────────────────────────────────────────────────
+
+  /src/folder.php:
+    get:
+      tags: [Folders]
+      summary: List root folders, or get sub-folders and documents of a folder
+      parameters:
+        - name: id
+          in: query
+          description: Folder ID — if provided, returns sub-folders and documents inside it
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Folder contents or root folder list
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          folders:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/Folder"
+                          documents:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/DocumentListItem"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Folder"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    post:
+      tags: [Folders]
+      summary: Create a folder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string }
+                parent_folder_id:
+                  type: integer
+                  nullable: true
+      responses:
+        "201":
+          description: Folder created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  id: { type: integer }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+    put:
+      tags: [Folders]
+      summary: Rename or move a folder
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                parent_folder_id:
+                  type: integer
+                  nullable: true
+      responses:
+        "200":
+          description: Folder updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      tags: [Folders]
+      summary: Delete a folder (documents inside are un-foldered, not deleted)
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Folder deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ── Tags ──────────────────────────────────────────────────────────────────
+
+  /src/tag.php:
+    get:
+      tags: [Tags]
+      summary: List all tags or get a single tag with its documents
+      parameters:
+        - name: id
+          in: query
+          description: Tag ID — if provided, returns the tag with its associated documents
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Tag(s)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/TagFull"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/TagWithCount"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    post:
+      tags: [Tags]
+      summary: Create a tag
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string }
+                color:
+                  type: string
+                  pattern: "^#[0-9a-fA-F]{6}$"
+                  default: "#6b8fa8"
+      responses:
+        "201":
+          description: Tag created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  id: { type: integer }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+    put:
+      tags: [Tags]
+      summary: Update a tag
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                color:
+                  type: string
+                  pattern: "^#[0-9a-fA-F]{6}$"
+      responses:
+        "200":
+          description: Tag updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      tags: [Tags]
+      summary: Soft-delete a tag
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Tag deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ── Versions ──────────────────────────────────────────────────────────────
+
+  /src/version.php:
+    get:
+      tags: [Versions]
+      summary: List versions of a document, or get a specific version
+      parameters:
+        - name: doc_id
+          in: query
+          required: true
+          schema: { type: integer }
+        - name: version_id
+          in: query
+          description: If provided, returns the full content of that version
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Version list or single version
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/VersionFull"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/VersionListItem"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    post:
+      tags: [Versions]
+      summary: Restore a document to a previous version (saves current state as new version first)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [doc_id, version_id]
+              properties:
+                doc_id: { type: integer }
+                version_id: { type: integer }
+      responses:
+        "200":
+          description: Version restored
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ── Comments ──────────────────────────────────────────────────────────────
+
+  /src/comment.php:
+    get:
+      tags: [Comments]
+      summary: Get all comments for a document (nested tree)
+      parameters:
+        - name: doc_id
+          in: query
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Comment tree
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Comment"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+    post:
+      tags: [Comments]
+      summary: Add a comment to a document
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [doc_id, content]
+              properties:
+                doc_id: { type: integer }
+                content: { type: string }
+                parent_comment_id:
+                  type: integer
+                  nullable: true
+                  description: Set to reply to an existing comment
+                anchor_position:
+                  type: string
+                  nullable: true
+                  description: Optional text anchor reference
+      responses:
+        "201":
+          description: Comment created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  id: { type: integer }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+    put:
+      tags: [Comments]
+      summary: Edit own comment
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content: { type: string }
+      responses:
+        "200":
+          description: Comment updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      tags: [Comments]
+      summary: Soft-delete a comment (author or document owner)
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Comment deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ── Permissions ───────────────────────────────────────────────────────────
+
+  /src/permission.php:
+    get:
+      tags: [Permissions]
+      summary: List all permissions for a document (owner only)
+      parameters:
+        - name: doc_id
+          in: query
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Permission list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Permission"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+    post:
+      tags: [Permissions]
+      summary: Share a document with another user (owner only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [doc_id, login]
+              properties:
+                doc_id: { type: integer }
+                login:
+                  type: string
+                  description: Target user's username or email
+                role:
+                  type: string
+                  enum: [editor, viewer]
+                  default: viewer
+      responses:
+        "201":
+          description: Permission granted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    put:
+      tags: [Permissions]
+      summary: Change a collaborator's role (owner only)
+      parameters:
+        - name: doc_id
+          in: query
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, role]
+              properties:
+                user_id: { type: integer }
+                role:
+                  type: string
+                  enum: [editor, viewer]
+      responses:
+        "200":
+          description: Role updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      tags: [Permissions]
+      summary: Revoke a collaborator's access (owner only)
+      parameters:
+        - name: doc_id
+          in: query
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id]
+              properties:
+                user_id: { type: integer }
+      responses:
+        "200":
+          description: Access revoked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  # ── Logs ──────────────────────────────────────────────────────────────────
+
+  /src/log.php:
+    get:
+      tags: [Logs]
+      summary: Get activity logs for the current user
+      parameters:
+        - name: doc_id
+          in: query
+          schema: { type: integer }
+        - name: folder_id
+          in: query
+          schema: { type: integer }
+        - name: tag_id
+          in: query
+          schema: { type: integer }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 50, maximum: 100 }
+        - name: offset
+          in: query
+          schema: { type: integer, default: 0 }
+      responses:
+        "200":
+          description: Log entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/LogEntry"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+# ---------------------------------------------------------------------------
+# Components
+# ---------------------------------------------------------------------------
+components:
+
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: token
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+  # ── Reusable responses ────────────────────────────────────────────────────
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: Not authenticated or token expired
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Conflict:
+      description: Resource already exists
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+  # ── Schemas ───────────────────────────────────────────────────────────────
+  schemas:
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+
+    UserBasic:
+      type: object
+      properties:
+        id: { type: integer }
+        username: { type: string }
+        email: { type: string, format: email }
+
+    AccountProfile:
+      allOf:
+        - $ref: "#/components/schemas/UserBasic"
+        - type: object
+          properties:
+            created_at: { type: string, format: date-time }
+            updated_at: { type: string, format: date-time }
+
+    LoginResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        token: { type: string }
+        expires_at: { type: string, format: date-time }
+        user:
+          $ref: "#/components/schemas/UserBasic"
+
+    Folder:
+      type: object
+      properties:
+        id: { type: integer }
+        user_id: { type: integer }
+        parent_folder_id: { type: integer, nullable: true }
+        name: { type: string }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        deleted_at: { type: string, format: date-time, nullable: true }
+
+    DocumentListItem:
+      type: object
+      properties:
+        id: { type: integer }
+        owner_id: { type: integer }
+        folder_id: { type: integer, nullable: true }
+        title: { type: string }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        role:
+          type: string
+          enum: [owner, editor, viewer]
+
+    DocumentFull:
+      allOf:
+        - $ref: "#/components/schemas/DocumentListItem"
+        - type: object
+          properties:
+            content: { type: string }
+            deleted_at: { type: string, format: date-time, nullable: true }
+            tags:
+              type: array
+              items:
+                $ref: "#/components/schemas/TagBasic"
+
+    TagBasic:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        color: { type: string, example: "#6b8fa8" }
+
+    TagWithCount:
+      allOf:
+        - $ref: "#/components/schemas/TagBasic"
+        - type: object
+          properties:
+            user_id: { type: integer }
+            created_at: { type: string, format: date-time }
+            updated_at: { type: string, format: date-time }
+            deleted_at: { type: string, format: date-time, nullable: true }
+            doc_count: { type: integer }
+
+    TagFull:
+      allOf:
+        - $ref: "#/components/schemas/TagWithCount"
+        - type: object
+          properties:
+            documents:
+              type: array
+              items:
+                type: object
+                properties:
+                  id: { type: integer }
+                  title: { type: string }
+                  updated_at: { type: string, format: date-time }
+
+    VersionListItem:
+      type: object
+      properties:
+        id: { type: integer }
+        version_number: { type: integer }
+        title: { type: string }
+        created_at: { type: string, format: date-time }
+        username: { type: string }
+
+    VersionFull:
+      allOf:
+        - $ref: "#/components/schemas/VersionListItem"
+        - type: object
+          properties:
+            doc_id: { type: integer }
+            user_id: { type: integer }
+            content: { type: string }
+
+    Comment:
+      type: object
+      properties:
+        id: { type: integer }
+        doc_id: { type: integer }
+        user_id: { type: integer }
+        username: { type: string }
+        parent_comment_id: { type: integer, nullable: true }
+        content: { type: string }
+        anchor_position: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        deleted_at: { type: string, format: date-time, nullable: true }
+        replies:
+          type: array
+          items:
+            $ref: "#/components/schemas/Comment"
+
+    Permission:
+      type: object
+      properties:
+        id: { type: integer }
+        user_id: { type: integer }
+        username: { type: string }
+        email: { type: string, format: email }
+        role:
+          type: string
+          enum: [owner, editor, viewer]
+        created_at: { type: string, format: date-time }
+
+    LogEntry:
+      type: object
+      properties:
+        id: { type: integer }
+        user_id: { type: integer }
+        username: { type: string }
+        doc_id: { type: integer, nullable: true }
+        folder_id: { type: integer, nullable: true }
+        tag_id: { type: integer, nullable: true }
+        action: { type: string }
+        created_at: { type: string, format: date-time }
