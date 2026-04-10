@@ -1,3 +1,5 @@
+CREATE DATABASE noty;
+
 USE noty;
 
 CREATE TABLE accounts (

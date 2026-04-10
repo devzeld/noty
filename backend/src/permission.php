@@ -48,7 +48,7 @@ switch ($method) {
         $body = json_decode(file_get_contents("php://input"), true);
         $docId = isset($body["doc_id"]) ? (int) $body["doc_id"] : null;
         $role = $body["role"] ?? "viewer";
-        $login = trim($body["login"] ?? ""); // username o email
+        $login = trim($body["login"] ?? "");
 
         if (!$docId || empty($login)) {
             http_response_code(400);
