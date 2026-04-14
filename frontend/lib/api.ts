@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:3306";
+const BASE_URL = "http://localhost/noty/backend/src";
 
 export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
 
@@ -11,22 +11,22 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
     },
   };
 
-  let response = await fetch(`${BASE_URL}/src/${endpoint}`, config);
+  let response = await fetch(`${BASE_URL}${endpoint}`, config);
 
   if (response.status === 401) {
     try {
-      const refreshResponse = await fetch(`${BASE_URL}/auth/refresh-token`, {
+      const refreshResponse = await fetch(`${BASE_URL}/auth/refresh.php`, {
         method: 'POST',
         credentials: 'include', 
       });
 
       if (refreshResponse.ok) {
-        response = await fetch(`${BASE_URL}/src/${endpoint}`, config);
+        response = await fetch(`${BASE_URL}${endpoint}`, config);
       } else {
         throw new Error('Refresh fallito');
       }
     } catch (error) {
-      window.location.href = '/login';
+      window.location.href = '/auth/login';
       return Promise.reject(error);
     }
   }

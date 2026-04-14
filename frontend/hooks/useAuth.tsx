@@ -28,7 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const checkAuth = async () => {
     setIsLoading(true);
     try {
-      const response = await apiFetch('/auth/me'); 
+      const response = await apiFetch('/me.php'); 
       
       if (response.ok) {
         const data = await response.json(); 
@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      await apiFetch('/auth/logout', { method: 'POST' });
+      await apiFetch('/auth/logout.php', { method: 'POST' });
       setUser(null);
       window.location.href = '/auth/login';
     } catch (error) {

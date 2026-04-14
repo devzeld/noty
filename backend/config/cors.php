@@ -1,7 +1,6 @@
 <?php
 $allowed_origins = [
     'http://localhost:3000',
-    'http://localhost:3000',
     'https://noty.zeld.space' // questo è il mio dominio
 ];
 
@@ -10,7 +9,7 @@ $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if (in_array($origin, $allowed_origins)) {
     header("Access-Control-Allow-Origin: $origin");
 } else {
-    header("Access-Control-Allow-Origin: http://localhost:3000");
+    header("Access-Control-Allow-Origin: *");
 }
 
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
