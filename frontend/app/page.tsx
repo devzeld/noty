@@ -1,13 +1,25 @@
-export default function Home() {
-  //TODO: check authentication
-  //TODO: in base a come siamo autenticati portare alla pagina giusta
-  //TODO: refresh del token in ogni pagina
-  
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation'; 
+import { useAuth } from '@/hooks/useAuth';
+
+export default function LandingPage() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.push('/dashboard');
+    }
+  }, [isAuthenticated, isLoading, router]);
+
+  if (isLoading) return <div>Caricamento...</div>;
+
   return (
     <main>
-      <div>
-        <p>Home</p>
-      </div>
+      <h1>Benvenuto su Noty</h1>
+      <button onClick={() => router.push('/auth/login')}>Accedi ora</button>
     </main>
-  )  
-};
+  );
+}
