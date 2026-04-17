@@ -47,7 +47,7 @@ export default function LoginForm() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true)
+
     setGlobalError(null)
 
     try {
@@ -63,7 +63,6 @@ export default function LoginForm() {
       await checkAuth()
 
       router.push("/")
-      
     } catch (error) {
       console.error("Errore di login:", error)
       setGlobalError("Email o password errate. Riprova.")

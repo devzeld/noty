@@ -7,7 +7,7 @@ import { Controller, useForm } from "react-hook-form"
 import * as z from "zod"
 
 import { useAuth } from "@/hooks/useAuth"
-import { apiFetch } from "@/lib/api" // La nostra fetch nativa
+import { apiFetch } from "@/lib/api"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -28,7 +28,7 @@ import { Input } from "@/components/ui/input"
 
 // 1. Schema con controllo "Conferma Password"
 const formSchema = z.object({
-  name: z.string().min(2, "Il nome deve contenere almeno 2 caratteri."),
+  username: z.string().min(2, "Il nome deve contenere almeno 2 caratteri."),
   email: z.string().email("Inserisci un indirizzo email valido."),
   password: z.string().min(6, "La password deve contenere almeno 6 caratteri."),
   confirmPassword: z.string(),
@@ -48,7 +48,7 @@ export default function RegisterForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
+      username: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -104,10 +104,8 @@ export default function RegisterForm() {
         <CardContent>
           <form id="register-form" onSubmit={form.handleSubmit(onSubmit)}>
             <FieldGroup>
-              
-              {/* Campo Nome */}
               <Controller
-                name="name"
+                name="username"
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
@@ -127,7 +125,6 @@ export default function RegisterForm() {
                 )}
               />
 
-              {/* Campo Email */}
               <Controller
                 name="email"
                 control={form.control}
@@ -149,7 +146,6 @@ export default function RegisterForm() {
                 )}
               />
 
-              {/* Campo Password */}
               <Controller
                 name="password"
                 control={form.control}
@@ -171,7 +167,6 @@ export default function RegisterForm() {
                 )}
               />
 
-              {/* Campo Conferma Password */}
               <Controller
                 name="confirmPassword"
                 control={form.control}

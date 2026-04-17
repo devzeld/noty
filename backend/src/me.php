@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . "/../middleware/bootstrap_auth.php";
+require_once __DIR__ . "\middleware\bootstrap_auth.php";
 
 $auth = Auth::getInstance();
 $auth->requireAuth();
