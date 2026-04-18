@@ -17,7 +17,7 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
     try {
       const refreshResponse = await fetch(`${BASE_URL}/auth/refresh.php`, {
         method: 'POST',
-        credentials: 'include', 
+        credentials: 'include',
       });
 
       if (refreshResponse.ok) {
@@ -26,7 +26,12 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
         throw new Error('Refresh fallito');
       }
     } catch (error) {
-      window.location.href = '/auth/login';
+      const currentPath = window.location.pathname;
+      
+      if (!currentPath.includes('/login')) {
+        window.location.href = '/auth/login';
+      }
+      
       return Promise.reject(error);
     }
   }

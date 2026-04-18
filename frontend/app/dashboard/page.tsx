@@ -14,15 +14,15 @@ import {
 } from "@/components/ui/card"
 
 export default function Dashboard() {
-  const router = useRouter()
+  const router = useRouter();
   
-  const { user, isAuthenticated, isLoading, logout } = useAuth()
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push("/auth/login")
     }
-  }, [isLoading, isAuthenticated, router])
+  }, [isLoading, isAuthenticated, router]);
 
   if (isLoading) {
     return (
@@ -30,9 +30,9 @@ export default function Dashboard() {
         <p className="text-muted-foreground animate-pulse">Verifica credenziali in corso...</p>
       </div>
     )
-  }
+  };
 
-  if (!user) return null
+  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-muted/40 p-4 md:p-8">
@@ -76,5 +76,5 @@ export default function Dashboard() {
 
       </div>
     </div>
-  )
+  );
 }
