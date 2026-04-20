@@ -80,8 +80,6 @@ switch ($method) {
         $stmt->execute([$userId, $name, $color]);
         $newId = (int) $db->lastInsertId();
 
-        Logger::write($userId, "tag_created", null, null, $newId);
-
         http_response_code(201);
         echo json_encode(["message" => "Tag creato", "id" => $newId]);
         break;
@@ -111,8 +109,6 @@ switch ($method) {
             "UPDATE tags SET name = ?, color = ?, updated_at = NOW() WHERE id = ?"
         )->execute([$name, $color, $tagId]);
 
-        Logger::write($userId, "tag_updated", null, null, $tagId);
-
         echo json_encode(["message" => "Tag aggiornato"]);
         break;
 
@@ -125,8 +121,6 @@ switch ($method) {
         requireTag($db, $tagId, $userId);
 
         $db->prepare("UPDATE tags SET deleted_at = NOW() WHERE id = ?")->execute([$tagId]);
-
-        Logger::write($userId, "tag_deleted", null, null, $tagId);
 
         echo json_encode(["message" => "Tag eliminato"]);
         break;

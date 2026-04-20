@@ -97,8 +97,6 @@ switch ($method) {
         $stmt->execute([$userId, $parentId, $name]);
         $newId = (int) $db->lastInsertId();
 
-        Logger::write($userId, "folder_created", null, $newId);
-
         http_response_code(201);
         echo json_encode(["message" => "Cartella creata", "id" => $newId]);
         break;
@@ -135,8 +133,6 @@ switch ($method) {
             "UPDATE folders SET name = ?, parent_folder_id = ?, updated_at = NOW() WHERE id = ?"
         )->execute([$name, $parentId, $folderId]);
 
-        Logger::write($userId, "folder_updated", null, $folderId);
-
         echo json_encode(["message" => "Cartella aggiornata"]);
         break;
 
@@ -155,8 +151,6 @@ switch ($method) {
         $db->prepare(
             "UPDATE folders SET deleted_at = NOW() WHERE id = ?"
         )->execute([$folderId]);
-
-        Logger::write($userId, "folder_deleted", null, $folderId);
 
         echo json_encode(["message" => "Cartella eliminata"]);
         break;

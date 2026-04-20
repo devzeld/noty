@@ -148,8 +148,6 @@ switch ($method) {
             }
         }
 
-        Logger::write($userId, "document_created", $newDocId, $folderId);
-
         http_response_code(201);
         echo json_encode(["message" => "Documento creato", "id" => $newDocId]);
         break;
@@ -187,8 +185,6 @@ switch ($method) {
             }
         }
 
-        Logger::write($userId, "document_updated", $docId);
-
         echo json_encode(["message" => "Documento aggiornato"]);
         break;
 
@@ -203,8 +199,6 @@ switch ($method) {
         $db->prepare(
             "UPDATE documents SET deleted_at = NOW() WHERE id = ?"
         )->execute([$docId]);
-
-        Logger::write($userId, "document_deleted", $docId);
 
         echo json_encode(["message" => "Documento eliminato"]);
         break;

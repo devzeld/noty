@@ -78,7 +78,7 @@ switch ($method) {
 
     case "POST":
         $body = json_decode(file_get_contents("php://input"), true);
-        $docId = isset($body["doc_id"])     ? (int) $body["doc_id"]     : null;
+        $docId = isset($body["doc_id"]) ? (int) $body["doc_id"] : null;
         $verId = isset($body["version_id"]) ? (int) $body["version_id"] : null;
 
         if (!$docId || !$verId) {
@@ -117,8 +117,6 @@ switch ($method) {
         $db->prepare(
             "UPDATE documents SET title = ?, content = ?, updated_at = NOW() WHERE id = ?"
         )->execute([$version["title"], $version["content"], $docId]);
-
-        Logger::write($userId, "version_restored", $docId);
 
         echo json_encode(["message" => "Versione ripristinata"]);
         break;
