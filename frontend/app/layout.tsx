@@ -1,22 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Roboto, JetBrains_Mono } from "next/font/google";
-import "./globals.css";
+import { Roboto, JetBrains_Mono } from "next/font/google";
 import { cn } from "@/lib/utils";
-import { AuthProvider } from '@/hooks/useAuth';
+import "./globals.css";
+import { LanguageProvider } from "@/hooks/useLanguage";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const jetbrainsMonoHeading = JetBrains_Mono({subsets:['latin'],variable:'--font-heading'});
 
 const roboto = Roboto({subsets:['latin'],variable:'--font-sans'});
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Noty",
@@ -27,11 +18,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning className={cn("font-sans", roboto.variable, jetbrainsMonoHeading.variable)}>
       <body
-        //className={`${geistSans.variable} ${geistMono.variable} antialiased select-none`}
+        className={cn("antialiased select-none")}
       >
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <LanguageProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
+          </LanguageProvider>
       </body>
     </html>
   );
