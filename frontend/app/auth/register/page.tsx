@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 
-// 1. Schema con controllo "Conferma Password"
 const formSchema = z.object({
   username: z.string().min(2, "Il nome deve contenere almeno 2 caratteri."),
   email: z.string().email("Inserisci un indirizzo email valido."),
@@ -34,7 +33,7 @@ const formSchema = z.object({
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Le password non coincidono.",
-  path: ["confirmPassword"], // Associa l'errore al campo confirmPassword
+  path: ["confirmPassword"],
 })
 
 export default function RegisterForm() {
@@ -44,7 +43,6 @@ export default function RegisterForm() {
   const [globalError, setGlobalError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // 2. Inizializziamo il form
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -55,13 +53,11 @@ export default function RegisterForm() {
     },
   })
 
-  // 3. Invio dei dati
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
     setGlobalError(null)
 
     try {
-      // Nota: Rimuoviamo 'confirmPassword' prima di inviare al backend
       const { confirmPassword, ...dataToSend } = values;
 
       const response = await apiFetch("/auth/register.php", {
@@ -70,20 +66,13 @@ export default function RegisterForm() {
       })
 
       if (!response.ok) {
-        // Puoi gestire errori specifici del backend qui (es. "Email già in uso")
         const errorData = await response.json();
         throw new Error(errorData.message || "Errore durante la registrazione.")
       }
 
-      // ASSUNZIONE: Il tuo backend dopo la registrazione effettua 
-      // anche il login automatico inviando il cookie.
-      // Se è così, aggiorniamo il context e andiamo alla home:
       await checkAuth()
       router.push("/")
       
-      // SE INVECE il backend non fa il login automatico, de-commenta questo:
-      // router.push("/login?registered=true")
-
     } catch (error: any) {
       console.error("Errore di registrazione:", error)
       setGlobalError(error.message || "Qualcosa è andato storto. Riprova.")
@@ -190,7 +179,6 @@ export default function RegisterForm() {
 
             </FieldGroup>
 
-            {/* Errori dal server */}
             {globalError && (
               <div className="mt-4 rounded-md bg-destructive/15 p-3 text-sm text-destructive font-medium">
                 {globalError}

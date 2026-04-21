@@ -27,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning className={cn("font-sans", roboto.variable, jetbrainsMonoHeading.variable)}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased select-none`}
+        //className={`${geistSans.variable} ${geistMono.variable} antialiased select-none`}
       >
         <AuthProvider>
           {children}

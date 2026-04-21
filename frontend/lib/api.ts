@@ -1,8 +1,7 @@
 const BASE_URL = "http://localhost/noty/backend/src";
 
 export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
-
-    const config: RequestInit = {
+  const config: RequestInit = {
     ...options,
     credentials: 'include', 
     headers: {
@@ -11,9 +10,15 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
     },
   };
 
+  // AGGIUNGIAMO QUESTI DUE LOG PER SPIARE LA CHIAMATA:
+  console.log("URL CHE STO CHIAMANDO:", `${BASE_URL}${endpoint}`);
+  console.log("CONFIGURAZIONE:", config);
+
   let response = await fetch(`${BASE_URL}${endpoint}`, config);
 
-  if (response.status === 401) {
+  const isAuthRoute = endpoint.includes('/login.php') || endpoint.includes('/register.php');
+
+  if (response.status === 401 && !isAuthRoute) {
     try {
       const refreshResponse = await fetch(`${BASE_URL}/auth/refresh.php`, {
         method: 'POST',
@@ -28,7 +33,7 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
     } catch (error) {
       const currentPath = window.location.pathname;
       
-      if (!currentPath.includes('/login')) {
+      if (!currentPath.includes('/login') && !currentPath.includes('/register')) {
         window.location.href = '/auth/login';
       }
       
