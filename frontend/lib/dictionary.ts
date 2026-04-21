@@ -8,7 +8,7 @@ export const dictionary = {
     },
     hero: {
       title1: "Il tuo spazio di lavoro,",
-      title2: "semplice e fulmineo.",
+      title2: "semplice e veloce.",
       subtitle: "Noty è lo strumento definitivo per organizzare le tue idee, sincronizzare i tuoi appunti e mantenere il focus su ciò che conta davvero. Nessuna distrazione, solo produttività.",
       ctaPrimary: "Inizia gratis ora",
       ctaSecondary: "Accedi al tuo account",
@@ -42,7 +42,7 @@ export const dictionary = {
     },
     hero: {
       title1: "Your workspace,",
-      title2: "simple and lightning fast.",
+      title2: "simple and fast.",
       subtitle: "Noty is the ultimate tool to organize your ideas, sync your notes, and keep your focus on what truly matters. No distractions, just productivity.",
       ctaPrimary: "Start for free now",
       ctaSecondary: "Log into your account",
@@ -76,7 +76,7 @@ export const dictionary = {
     },
     hero: {
       title1: "Tu espacio de trabajo,",
-      title2: "simple y ultrarrápido.",
+      title2: "simple y rápido.",
       subtitle: "Noty es la herramienta definitiva para organizar tus ideas, sincronizar tus notas y mantener el enfoque en lo que realmente importa. Sin distracciones, solo productividad.",
       ctaPrimary: "Empieza gratis ahora",
       ctaSecondary: "Accede a tu cuenta",
@@ -111,7 +111,7 @@ export const dictionary = {
     hero: {
       title1: "あなたのワークスペース、",
       title2: "シンプルで高速。",
-      subtitle: "Notyは、アイデアの整理、ノートの同期、本当に重要なことに集中するための最適なツールです。無駄なものはなく、生産性だけ。",
+      subtitle: "ノーティは、アイデアの整理、ノートの同期、本当に重要なことに集中するための最適なツールです。無駄なものはなく、生産性だけ。",
       ctaPrimary: "今すぐ無料で始める",
       ctaSecondary: "アカウントにログイン",
     },

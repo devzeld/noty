@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . "\..\middleware\bootstrap.php";
+require_once __DIR__ . "\middleware\bootstrap.php";
 
 $auth = Auth::getInstance();
 $auth->requireAuth();
@@ -11,65 +11,20 @@ $method = $_SERVER["REQUEST_METHOD"];
 
 $docId = isset($_GET["id"]) ? (int) $_GET["id"] : null;
 
-function requireDocPermission(PDO $db, int $docId, int $userId, string $minRole = "viewer"): array
-{
-    $roles = ["viewer" => 0, "editor" => 1, "owner" => 2];
-
-    $stmt = $db->prepare(
-        "SELECT d.*, dp.role
-         FROM documents d
-         LEFT JOIN doc_permissions dp ON dp.doc_id = d.id AND dp.user_id = ?
-         WHERE d.id = ? AND d.deleted_at IS NULL"
-    );
-    $stmt->execute([$userId, $docId]);
-    $doc = $stmt->fetch();
-
-    if (!$doc) {
-        http_response_code(404);
-        exit(json_encode(["error" => "Documento non trovato"]));
-    }
-
-    $role = $doc["owner_id"] === $userId ? "owner" : ($doc["role"] ?? null);
-
-    if ($role === null || $roles[$role] < $roles[$minRole]) {
-        http_response_code(403);
-        exit(json_encode(["error" => "Accesso non autorizzato"]));
-    }
-
-    $doc["_role"] = $role;
-    return $doc;
-}
-
-function createVersion(PDO $db, int $docId, int $userId, string $title, string $content): void
-{
-    try {
-        $db->beginTransaction();
-        $stmt = $db->prepare(
-            "SELECT COALESCE(MAX(version_number), 0) + 1 AS next
-             FROM versions
-             WHERE doc_id = ?
-             FOR UPDATE"
-        );
-        $stmt->execute([$docId]);
-        $nextVersion = (int) $stmt->fetchColumn();
-
-        $stmt = $db->prepare(
-            "INSERT INTO versions (doc_id, user_id, title, content, version_number)
-             VALUES (?, ?, ?, ?, ?)"
-        );
-        $stmt->execute([$docId, $userId, $title, $content, $nextVersion]);
-
-        $db->commit();
-    } catch (Exception $e) {
-        $db->rollBack();
-        throw $e;
-    }
-}
-
 switch ($method) {
     case "GET":
         if ($docId) {
-            $doc = requireDocPermission($db, $docId, $userId, "viewer");
+            $stmt = $db->prepare(
+                "SELECT * FROM documents 
+                 WHERE id = ? AND owner_id = ? AND deleted_at IS NULL"
+            );
+            $stmt->execute([$docId, $userId]);
+            $doc = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$doc) {
+                http_response_code(404);
+                exit(json_encode(["error" => "Documento non trovato o non autorizzato"]));
+            }
 
             $stmt = $db->prepare(
                 "SELECT t.id, t.name, t.color
@@ -78,19 +33,17 @@ switch ($method) {
                  WHERE dt.doc_id = ?"
             );
             $stmt->execute([$docId]);
-            $doc["tags"] = $stmt->fetchAll();
+            $doc["tags"] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             echo json_encode(["data" => $doc]);
         } else {
             $folderId = isset($_GET["folder_id"]) ? (int) $_GET["folder_id"] : null;
             $search   = isset($_GET["q"]) ? "%" . trim($_GET["q"]) . "%" : null;
 
-            $sql = "SELECT d.id, d.owner_id, d.folder_id, d.title, d.created_at, d.updated_at,
-                           COALESCE(dp.role, 'owner') AS role
+            $sql = "SELECT d.id, d.folder_id, d.title, d.created_at, d.updated_at, d.favorite
                     FROM documents d
-                    LEFT JOIN doc_permissions dp ON dp.doc_id = d.id AND dp.user_id = :uid
                     WHERE d.deleted_at IS NULL
-                      AND (d.owner_id = :uid OR dp.user_id = :uid)";
+                      AND d.owner_id = :uid";
 
             $params = [":uid" => $userId];
 
@@ -107,7 +60,7 @@ switch ($method) {
 
             $stmt = $db->prepare($sql);
             $stmt->execute($params);
-            $docs = $stmt->fetchAll();
+            $docs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             echo json_encode(["data" => $docs]);
         }
@@ -135,12 +88,6 @@ switch ($method) {
         $stmt->execute([$userId, $folderId, $title, $content]);
         $newDocId = (int) $db->lastInsertId();
 
-        $db->prepare(
-            "INSERT INTO doc_permissions (doc_id, user_id, role) VALUES (?, ?, 'owner')"
-        )->execute([$newDocId, $userId]);
-
-        createVersion($db, $newDocId, $userId, $title, $content);
-
         if (!empty($tagIds)) {
             $ins = $db->prepare("INSERT IGNORE INTO doc_tags (doc_id, tag_id) VALUES (?, ?)");
             foreach ($tagIds as $tid) {
@@ -158,7 +105,15 @@ switch ($method) {
             exit(json_encode(["error" => "ID documento obbligatorio"]));
         }
 
-        $doc  = requireDocPermission($db, $docId, $userId, "editor");
+        $stmt = $db->prepare("SELECT * FROM documents WHERE id = ? AND owner_id = ? AND deleted_at IS NULL");
+        $stmt->execute([$docId, $userId]);
+        $doc = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$doc) {
+            http_response_code(404);
+            exit(json_encode(["error" => "Documento non trovato o non autorizzato"]));
+        }
+
         $body = json_decode(file_get_contents("php://input"), true);
 
         $title    = isset($body["title"])   ? trim($body["title"])  : $doc["title"];
@@ -166,14 +121,10 @@ switch ($method) {
         $folderId = array_key_exists("folder_id", $body) ? ($body["folder_id"] ? (int) $body["folder_id"] : null) : $doc["folder_id"];
         $tagIds   = $body["tag_ids"] ?? null;
 
-        if ($content !== $doc["content"] || $title !== $doc["title"]) {
-            createVersion($db, $docId, $userId, $doc["title"], $doc["content"]);
-        }
-
         $db->prepare(
             "UPDATE documents SET title = ?, content = ?, folder_id = ?, updated_at = NOW()
-             WHERE id = ?"
-        )->execute([$title, $content, $folderId, $docId]);
+             WHERE id = ? AND owner_id = ?"
+        )->execute([$title, $content, $folderId, $docId, $userId]);
 
         if ($tagIds !== null) {
             $db->prepare("DELETE FROM doc_tags WHERE doc_id = ?")->execute([$docId]);
@@ -194,11 +145,9 @@ switch ($method) {
             exit(json_encode(["error" => "ID documento obbligatorio"]));
         }
 
-        requireDocPermission($db, $docId, $userId, "owner");
-
         $db->prepare(
-            "UPDATE documents SET deleted_at = NOW() WHERE id = ?"
-        )->execute([$docId]);
+            "UPDATE documents SET deleted_at = NOW() WHERE id = ? AND owner_id = ?"
+        )->execute([$docId, $userId]);
 
         echo json_encode(["message" => "Documento eliminato"]);
         break;

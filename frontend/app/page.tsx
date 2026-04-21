@@ -1,12 +1,12 @@
 "use client"
 
 import Link from "next/link"
-import { useLanguage } from "@/hooks/useLanguage";
+import { useLanguage } from "@/hooks/useLanguage"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { Button } from "@/components/ui/button"
 import { NotebookPen, ArrowRight, Cloud, Shield, Zap } from "lucide-react"
-import { ThemeSwitcher } from "@/components/theme-provider";
-import { Card, CardHeader, CardTitle, CardContent, CardDescription} from "@/components/ui/card";
+import { ThemeSwitcher } from "@/components/theme-provider"
+import { Card, CardHeader, CardTitle, CardContent, CardDescription} from "@/components/ui/card"
 
 export default function LandingPage() {
   const { t } = useLanguage();
@@ -26,10 +26,10 @@ export default function LandingPage() {
 
             <ThemeSwitcher/>
             
-            <Link href="/login">
+            <Link href="/auth">
               <Button variant="outline">{t.nav.login}</Button>
             </Link>
-            <Link href="/register">
+            <Link href="/auth">
               <Button variant="default">{t.nav.register}</Button>
             </Link>
           </nav>
@@ -49,12 +49,12 @@ export default function LandingPage() {
               {t.hero.subtitle}
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/register">
+              <Link href="/auth">
                 <Button size="lg" className="h-12 px-8 text-base w-full sm:w-auto">
                   {t.hero.ctaPrimary}
                 </Button>
               </Link>
-              <Link href="/login">
+              <Link href="/auth">
                 <Button variant="outline" size="lg" className="h-12 px-8 text-base w-full sm:w-auto">
                   {t.hero.ctaSecondary}
                   <ArrowRight className="ml-2 h-4 w-4" />

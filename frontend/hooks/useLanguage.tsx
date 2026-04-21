@@ -1,12 +1,12 @@
-"use client";
+"use client"
 
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { dictionary, Language } from "@/lib/dictionary";
+import React, { createContext, useContext, useEffect, useState } from "react"
+import { dictionary, Language } from "@/lib/dictionary"
 
 interface LanguageContextType {
-  lang: Language;
-  setLang: (lang: Language) => void;
-  t: typeof dictionary.it;
+  lang: Language
+  setLang: (lang: Language) => void
+  t: typeof dictionary.it
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
@@ -23,7 +23,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const handleSetLang = (newLang: Language) => {
     setLang(newLang)
-    localStorage.setItem("language", newLang)
+    localStorage.setItem("language", newLang);
   }
 
   const t = dictionary[lang]

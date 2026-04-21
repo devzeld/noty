@@ -137,9 +137,9 @@ class Auth
         setcookie("token", $token, [
             "expires"  => $expiresAtTimestamp,
             "path"     => "/",
-            "secure"   => true,
+            "secure"   => false,
             "httponly" => true,
-            "samesite" => "None",
+            "samesite" => "Lax",
         ]);
 
         return [
@@ -162,11 +162,11 @@ class Auth
         $stmt->execute([$this->token]);
 
         setcookie("token", "", [
-            "expires" => time() - 3600,
-            "path" => "/",
-            "secure" => true,
+            "expires"  => time() - 3600,
+            "path"     => "/",
+            "secure"   => false,
             "httponly" => true,
-            "samesite" => "None",
+            "samesite" => "Lax",
         ]);
 
         $this->user = null;
@@ -189,11 +189,11 @@ class Auth
 
         if ($stmt->rowCount() > 0) {
             setcookie("token", $newToken, [
-                "expires" => $expiresAtTimestamp,
-                "path" => "/",
-                "secure" => true,
+                "expires"  => $expiresAtTimestamp,
+                "path"     => "/",
+                "secure"   => false,
                 "httponly" => true,
-                "samesite" => "None",
+                "samesite" => "Lax",
             ]);
 
             $this->token = $newToken;

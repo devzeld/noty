@@ -7,16 +7,16 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 }
 
 $body = json_decode(file_get_contents("php://input"), true);
-$login = trim($body["login"] ?? "");
+$identifier = trim($body["identifier"] ?? "");
 $password = $body["password"] ?? "";
 
-if (empty($login) || empty($password)) {
+if (empty($identifier) || empty($password)) {
     http_response_code(400);
-    exit(json_encode(["error" => "Login e password sono obbligatori"]));
+    exit(json_encode(["error" => "Identificatore e password sono obbligatori"]));
 }
 
 $auth = Auth::getInstance();
-$result = $auth->attempt($login, $password);
+$result = $auth->attempt($identifier, $password);
 
 if ($result["success"]) {
     echo json_encode($result);
