@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useLanguage } from "@/hooks/useLanguage"
-import { LanguageSwitcher } from "@/components/language-switcher"
+import { LanguageSwitcher } from "@/components/language-toggle"
 import { Button } from "@/components/ui/button"
 import { NotebookPen, ArrowRight, Cloud, Shield, Zap } from "lucide-react"
 import { ThemeSwitcher } from "@/components/theme-provider"

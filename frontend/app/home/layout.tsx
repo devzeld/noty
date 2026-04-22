@@ -4,6 +4,8 @@ import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { HomeSidebar } from '@/components/sidebar';
+import { ThemeSwitcher } from '@/components/theme-provider';
+import { TopSearch } from '@/components/search';
 
 export default function HomeLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname(); 
@@ -30,9 +32,20 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
   return (
     <SidebarProvider className="flex h-screen bg-background">
       <HomeSidebar/>
-      <main className="flex-1 overflow-y-auto">
-        <SidebarTrigger />
-        {children}
+      <main className="flex-1 overflow-hidden flex flex-col bg-background">
+        <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 lg:hidden justify-between">
+          <SidebarTrigger variant="outline"/>
+
+          <ThemeSwitcher/>
+        </header>
+
+        <header className='sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4'>
+          <TopSearch/>
+        </header>
+
+        <div className="flex-1 overflow-y-auto">
+          {children}
+        </div>
       </main>
     </SidebarProvider>
   );
