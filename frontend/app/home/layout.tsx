@@ -2,6 +2,8 @@
 
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { HomeSidebar } from '@/components/sidebar';
 
 export default function HomeLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname(); 
@@ -9,7 +11,6 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     const refreshSession = async () => {
       try {
-        // Usa 'localhost' per matchare il dominio del browser
         const response = await fetch('http://localhost/noty/backend/src/auth/refresh.php', { 
           method: 'POST',
           credentials: 'include', 
@@ -19,7 +20,6 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
             console.warn("Refresh fallito: sessione probabilmente scaduta.");
         }
       } catch (error) {
-        // Logghiamo l'errore reale per il debug
         console.error("Errore di rete nel refresh:", error);
       }
     };
@@ -28,14 +28,12 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
   }, [pathname]);
 
   return (
-    <div className="flex h-screen bg-background">
-      <aside className="w-64 border-r bg-card p-4 hidden md:block">
-        <h2 className="font-bold mb-4">Noty Menu</h2>
-        {/* Qui i tuoi link della sidebar */}
-      </aside>
+    <SidebarProvider className="flex h-screen bg-background">
+      <HomeSidebar/>
       <main className="flex-1 overflow-y-auto">
+        <SidebarTrigger />
         {children}
       </main>
-    </div>
+    </SidebarProvider>
   );
 }

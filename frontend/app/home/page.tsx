@@ -38,8 +38,15 @@ export default async function Home() {
   return (
     <div className="p-8">
       <h1 className="text-3xl font-bold mb-6">I miei Documenti</h1>
-      <pre>{JSON.stringify(documents, null, 2)}</pre>
-      {/* Sostituisci il <pre> con il map() per renderizzare le card che avevamo fatto prima */}
+      {documents.length === 0 && (
+        <p className="text-gray-500">Nessun documento trovato. Prova a creare un nuovo documento!</p>
+      )}
+      {documents.map((doc: any) => (
+        <div key={doc.id} className="p-4 mb-4 border rounded">
+          <h2 className="text-xl font-semibold">{doc.title}</h2>
+          <p className="text-gray-500 overflow-hidden text-ellipsis">{doc.description}</p>
+        </div>
+      ))}
     </div>
   );
 }
