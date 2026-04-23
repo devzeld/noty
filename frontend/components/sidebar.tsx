@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Clock, Star, Settings, NotebookPen, Plus } from "lucide-react"
+import { Home, Clock, Star, Settings, NotebookPen, Plus, Trash } from "lucide-react"
 
 import {
   Sidebar,
@@ -20,6 +20,7 @@ const mainItems = [
   { title: "Home", url: "/home", icon: Home },
   { title: "Recenti", url: "/home/recent", icon: Clock },
   { title: "Preferiti", url: "/home/favorite", icon: Star },
+  { title: "Cestino", url: "/home/trash", icon: Trash },
 ]
 
 export function HomeSidebar() {
@@ -48,7 +49,7 @@ export function HomeSidebar() {
                 variant="outline"
                 //tooltip="Crea Documento"
               >
-                  <Link href="/home/new">
+                  <Link href="/editor/new">
                     <Plus />
                     <span>Crea Documento</span>
                   </Link>

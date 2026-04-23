@@ -11,8 +11,6 @@ import {
   CardDescription, 
   CardFooter 
 } from '@/components/ui/card'; 
-import { Select, SelectTrigger, SelectContent, SelectGroup, SelectItem, SelectValue} from './ui/select';
-import { Separator } from './ui/separator';
 
 type Document = {
   id: string | number;
@@ -47,7 +45,7 @@ export function DocumentList({
   }
 
   function handleOpening(docId: string | number): void {
-      router.push(`/home/editor/${docId}`);
+      router.push(`/editor/${docId}`);
   }
 
   function handleToggleFavorite(event: React.MouseEvent<HTMLButtonElement>): void {
@@ -60,30 +58,7 @@ export function DocumentList({
       {!(checkedNotes.length > 0) && (
         <div className="mb-4 p-3 bg-muted/50 rounded-lg flex items-center justify-between border animate-in fade-in slide-in-from-top-4">
           <div className="flex gap-2">
-            <Select>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="document">Documento</SelectItem>
-                  <SelectItem value="folder">Cartella</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-              
-            </Select>
-              <Separator orientation="vertical" /><Select>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Ordina per" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="title">Titolo</SelectItem>
-                    <SelectItem value="date">Data modifica</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              
+            {/*TODO: Filters */}
           </div>
           <span className="text-sm font-medium">{checkedNotes.length} note selezionate</span>
         </div>
@@ -154,11 +129,9 @@ export function DocumentList({
                   </CardTitle>
                   {!!doc.favorite && <span className="text-yellow-500 ml-2 text-xl drop-shadow-sm">★</span>}
                 </CardHeader>
-                
-                <div className="flex-1"></div>
 
                 <CardFooter className="text-xs text-muted-foreground pb-4 pt-0">
-                  Modificato il: {new Date(doc.updated_at).toLocaleDateString('it-IT')}
+                  Ultima modifica: {new Date(doc.updated_at).toLocaleString('it-IT', { day: 'numeric', month: 'long'})}
                 </CardFooter>
               </Card>
             );
