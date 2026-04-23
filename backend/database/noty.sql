@@ -12,6 +12,15 @@ CREATE TABLE accounts (
     deleted_at DATETIME
 );
 
+CREATE TABLE profiles(
+    user_id INT NOT NULL PRIMARY KEY,
+    display_name VARCHAR(100),
+    avatar_url VARCHAR(255),
+    theme_preference VARCHAR(20) DEFAULT 'light',
+    language VARCHAR(10) DEFAULT 'it',
+    CONSTRAINT FOREIGN KEY (user_id) REFERENCES accounts (id) ON DELETE CASCADE
+);
+
 CREATE TABLE sessions (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
