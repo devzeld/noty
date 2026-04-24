@@ -10,6 +10,7 @@ $db = DBHandler::getPDO();
 $method = $_SERVER["REQUEST_METHOD"];
 
 $docId = isset($_GET["id"]) ? (int) $_GET["id"] : null;
+$isFavorite = isset($_GET["fav"]) ? (bool) $_GET["fav"] : null;
 
 switch ($method) {
     case "GET":
@@ -39,6 +40,7 @@ switch ($method) {
         } else {
             $folderId = isset($_GET["folder_id"]) ? (int) $_GET["folder_id"] : null;
             $search   = isset($_GET["q"]) ? "%" . trim($_GET["q"]) . "%" : null;
+            $isFavorite = isset($_GET["fav"]) ? (bool) $_GET["fav"] : null;
 
             $sql = "SELECT d.id, d.folder_id, d.title, d.created_at, d.updated_at, d.favorite
                     FROM documents d
@@ -54,6 +56,10 @@ switch ($method) {
             if ($search) {
                 $sql .= " AND (d.title LIKE :q OR d.content LIKE :q)";
                 $params[":q"] = $search;
+            }
+            if ($isFavorite !== null) {
+                $sql .= " AND d.favorite = :fav";
+                $params[":fav"] = $isFavorite;
             }
 
             $sql .= " ORDER BY d.updated_at DESC";

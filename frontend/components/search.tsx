@@ -23,11 +23,7 @@ export function TopSearch() {
       params.set("q", value)
     }
 
-    if (pathname !== '/home') {
-      router.push(`/home?${params.toString()}`)
-    } else {
-      router.replace(`/home?${params.toString()}`)
-    }
+    router.push(`?${params.toString()}`)
   }
 
   return (
