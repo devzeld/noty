@@ -23,6 +23,18 @@ const mainItems = [
   { title: "Cestino", url: "/home/trash", icon: Trash },
 ]
 
+export default function SidebarPage() {
+  return (
+    <div className="flex h-screen w-full">
+      <HomeSidebar />
+      <div className="flex-1 p-4">
+        <h1 className="text-2xl font-bold">Contenuto Principale</h1>
+        <p className="mt-2 text-gray-600">Seleziona un elemento dalla sidebar per visualizzare il contenuto.</p>
+      </div>
+    </div>
+  )
+}
+
 export function HomeSidebar() {
   const pathname = usePathname()
 
