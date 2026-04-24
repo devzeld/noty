@@ -26,7 +26,6 @@ const mainItems = [
 export default function SidebarPage() {
   return (
     <div className="flex h-screen w-full">
-      <HomeSidebar />
       <div className="flex-1 p-4">
         <h1 className="text-2xl font-bold">Contenuto Principale</h1>
       </div>
