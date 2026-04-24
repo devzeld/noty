@@ -29,7 +29,6 @@ export default function SidebarPage() {
       <HomeSidebar />
       <div className="flex-1 p-4">
         <h1 className="text-2xl font-bold">Contenuto Principale</h1>
-        <p className="mt-2 text-gray-600">Seleziona un elemento dalla sidebar per visualizzare il contenuto.</p>
       </div>
     </div>
   )
