@@ -39,18 +39,37 @@ export function DocumentList({
       });
   };
 
+  function handleToggleSelectAll(): void {
+    if (checkedNotes.length === documents.length) {
+        setCheckedNotes([]);
+    } else {
+        setCheckedNotes(documents.map((doc) => doc.id));
+    }
+  }
+
+  function handleToggleDeselectAll(): void {
+    setCheckedNotes([]);
+  }
+
+  function handleResetDeleteSelected(event: React.MouseEvent<HTMLButtonElement>): void {
+    event.preventDefault();
+    setCheckedNotes([]);
+    //TODO: Chiamata API per ripristinare i documenti eliminati selezionati
+  }
+
+
   function handleDeleteSelected(event: React.MouseEvent<HTMLButtonElement>): void {
-      event.preventDefault();
-      setCheckedNotes([]);
+    event.preventDefault();
+    setCheckedNotes([]);
   }
 
   function handleOpening(docId: string | number): void {
-      router.push(`/editor/${docId}`);
+    router.push(`/editor/${docId}`);
   }
 
   function handleToggleFavorite(event: React.MouseEvent<HTMLButtonElement>): void {
-      event.preventDefault();
-      alert(`Toggling favorite for document ID: ${checkedNotes.join(', ')}`);
+    event.preventDefault();
+    alert(`Toggling favorite for document ID: ${checkedNotes.join(', ')}`);
   }
 
   return (

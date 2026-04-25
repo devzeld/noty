@@ -10,7 +10,6 @@ $db = DBHandler::getPDO();
 $method = $_SERVER["REQUEST_METHOD"];
 
 $docId = isset($_GET["id"]) ? (int) $_GET["id"] : null;
-$isFavorite = isset($_GET["fav"]) ? (bool) $_GET["fav"] : null;
 
 switch ($method) {
     case "GET":
@@ -40,7 +39,8 @@ switch ($method) {
         } else {
             $folderId = isset($_GET["folder_id"]) ? (int) $_GET["folder_id"] : null;
             $search   = isset($_GET["q"]) ? "%" . trim($_GET["q"]) . "%" : null;
-            $isFavorite = isset($_GET["fav"]) ? (bool) $_GET["fav"] : null;
+            $areFavorite = isset($_GET["fav"]) ? (bool) $_GET["fav"] : null;
+            $areDeleted = isset($_GET["trashed"]) ? (bool) $_GET["trashed"] : null;
 
             $sql = "SELECT d.id, d.folder_id, d.title, d.created_at, d.updated_at, d.favorite
                     FROM documents d
@@ -57,9 +57,13 @@ switch ($method) {
                 $sql .= " AND (d.title LIKE :q OR d.content LIKE :q)";
                 $params[":q"] = $search;
             }
-            if ($isFavorite !== null) {
+            if ($areFavorite !== null) {
                 $sql .= " AND d.favorite = :fav";
-                $params[":fav"] = $isFavorite;
+                $params[":fav"] = $areFavorite;
+            }
+
+            if ($areDeleted !== null) {
+                $sql .= " AND d.deleted_at IS " . ($areDeleted ? "NOT NULL" : "NULL");
             }
 
             $sql .= " ORDER BY d.updated_at DESC";
@@ -73,8 +77,8 @@ switch ($method) {
         break;
 
     case "POST":
-        $body    = json_decode(file_get_contents("php://input"), true);
-        $title   = trim($body["title"] ?? "Nuova documento");
+        $body = json_decode(file_get_contents("php://input"), true);
+        $title = trim($body["title"] ?? "Nuova documento");
         $content = $body["content"] ?? "";
         $folderId = isset($body["folder_id"]) ? (int) $body["folder_id"] : null;
         $tagIds  = $body["tag_ids"] ?? [];

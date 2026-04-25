@@ -10,7 +10,7 @@ async function getDocuments(query: string = "") {
   if (!token) return [];
 
   try {
-    const url = `http://localhost/noty/backend/src/document.php${query ? `?q=${encodeURIComponent(query)}` : ''}`;
+    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost/noty/backend/src/' }document.php${query ? `?q=${encodeURIComponent(query)}` : ''}`;
     
     const res = await fetch(url, {
       method: 'GET',
