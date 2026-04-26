@@ -14,10 +14,16 @@ CREATE TABLE accounts (
 
 CREATE TABLE profiles(
     user_id INT NOT NULL PRIMARY KEY,
-    display_name VARCHAR(100),
+    display_name VARCHAR(100) UNIQUE,
     avatar_url VARCHAR(255),
     theme_preference VARCHAR(20) DEFAULT 'light',
     language VARCHAR(10) DEFAULT 'it',
+    CONSTRAINT FOREIGN KEY (user_id) REFERENCES accounts (id) ON DELETE CASCADE
+);
+
+CREATE TABLE settings (
+    user_id INT NOT NULL PRIMARY KEY,
+    notifications_enabled BOOLEAN DEFAULT TRUE,
     CONSTRAINT FOREIGN KEY (user_id) REFERENCES accounts (id) ON DELETE CASCADE
 );
 

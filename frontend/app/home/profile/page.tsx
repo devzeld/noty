@@ -1,33 +1,47 @@
-import { cookies } from "next/headers";
+import { cookies } from 'next/headers';
+import { ProfileForm } from '@/components/profile-form';
 
-async function getUserProfile() {
+async function getInitialProfile() {
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value;
 
   if (!token) return null;
 
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}profile.php`, {
-    headers: {
-      "Authorization": `Bearer ${token}`
-    }
-  });
-  if (!response.ok) {
-    console.error("Errore nel recupero del profilo:", await response.text());
+  try {
+    const res = await fetch('http://localhost/noty/backend/src/profile.php', {
+      method: 'GET',
+      headers: {
+        'Cookie': `token=${token}`,
+        'Authorization': `Bearer ${token}`,
+      },
+      cache: 'no-store'
+    });
+
+    if (!res.ok) return null;
+
+    const json = await res.json();
+    return json.data;
+  } catch (error) {
+    console.error("Errore fetch profilo:", error);
     return null;
   }
-  const data = await response.json();
-  return data;
 }
 
-export default function Profile() {
+export default async function Profile() {
+  const profileData = await getInitialProfile();
+
+  if (!profileData) {
+    return (
+      <div className="p-8 text-center text-muted-foreground mt-20">
+        <p>Impossibile caricare il profilo.</p>
+        <p className="text-sm">Assicurati di essere loggato e che il backend sia attivo.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-6">Profilo utente</h1>
-      <p className="text-gray-500">Questa sezione è in costruzione. Torna presto per gestire il tuo profilo!</p>
+    <div className="p-4 md:p-8 w-full max-w-5xl mx-auto">      
+      <ProfileForm initialData={profileData} />
     </div>
-  )
-}
-
-function getToken() {
-  throw new Error("Function not implemented.");
+  );
 }

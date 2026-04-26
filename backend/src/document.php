@@ -126,10 +126,10 @@ switch ($method) {
 
         $body = json_decode(file_get_contents("php://input"), true);
 
-        $title    = isset($body["title"])   ? trim($body["title"])  : $doc["title"];
-        $content  = isset($body["content"]) ? $body["content"]      : $doc["content"];
+        $title = isset($body["title"])   ? trim($body["title"])  : $doc["title"];
+        $content = isset($body["content"]) ? $body["content"]      : $doc["content"];
         $folderId = array_key_exists("folder_id", $body) ? ($body["folder_id"] ? (int) $body["folder_id"] : null) : $doc["folder_id"];
-        $tagIds   = $body["tag_ids"] ?? null;
+        $tagIds = $body["tag_ids"] ?? null;
 
         $db->prepare(
             "UPDATE documents SET title = ?, content = ?, folder_id = ?, updated_at = NOW()

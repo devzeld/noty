@@ -139,7 +139,6 @@ class Auth
             "path"     => "/",
             "secure"   => false,
             "httponly" => true,
-            "samesite" => "Lax",
         ]);
 
         return [
@@ -166,7 +165,6 @@ class Auth
             "path"     => "/",
             "secure"   => false,
             "httponly" => true,
-            "samesite" => "Lax",
         ]);
 
         $this->user = null;
@@ -193,8 +191,10 @@ class Auth
                 "path"     => "/",
                 "secure"   => false,
                 "httponly" => true,
-                "samesite" => "Lax",
             ]);
+            if (headers_sent($file, $line)) {
+                die("Errore critico: i cookie non possono essere salvati perché l'output è iniziato nel file $file alla riga $line");
+            }
 
             $this->token = $newToken;
             return [
@@ -203,6 +203,7 @@ class Auth
             ];
         }
 
+        error_log("Refresh fallito: rowCount è 0. Il token vecchio era: " . $this->token);
         return false;
     }
 }

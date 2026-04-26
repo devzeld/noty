@@ -74,17 +74,17 @@ export function DocumentList({
 
   return (
     <>
-      {!(checkedNotes.length > 0) && (
+      {/* {!(checkedNotes.length > 0) && (
         <div className="mb-4 p-3 bg-muted/50 rounded-lg flex items-center justify-between border animate-in fade-in slide-in-from-top-4">
           <div className="flex gap-2">
-            {/*TODO: Filters */}
+            {TODO: Filters}
           </div>
           <span className="text-sm font-medium">{checkedNotes.length} note selezionate</span>
         </div>
         ) 
-      }
+      } */}
 
-      {checkedNotes.length > 0 && (
+      {/* {checkedNotes.length > 0 && (
         <div className="mb-4 p-3 bg-muted/50 rounded-lg flex items-center justify-between border animate-in fade-in slide-in-from-top-4">
           <div className="flex gap-2">
             <Button variant="ghost" onClick={handleDeleteSelected} size="icon">
@@ -99,7 +99,7 @@ export function DocumentList({
           </div>
           <span className="text-sm font-medium">{checkedNotes.length} note selezionate</span>
         </div>
-      )}
+      )} */}
 
       {currentView === 'list' ? (
         <div className="flex flex-col gap-2">
