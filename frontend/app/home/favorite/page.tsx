@@ -2,6 +2,7 @@ import { DocumentList } from "@/components/document-list"
 import { ViewToggle } from "@/components/view-toggle"
 import { cookies } from "next/headers"
 import Link from "next/link"
+import { Suspense } from "react"
 
 async function getFavoriteDocuments(query: string = "") {
   const cookieStore = await cookies()
@@ -48,30 +49,32 @@ export default async function Favorite({
   const documents = await getFavoriteDocuments(searchQuery)
   
   return (
-    <div className="p-8">
-      <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          {searchQuery ? `Risultati per "${searchQuery}" tra i tuoi preferiti` : 'I miei Preferiti'}
-        </h1>
-        <div><ViewToggle /></div>
-      </div>
-
-      {documents.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center border rounded-xl bg-muted/20 border-dashed">
-          {searchQuery ? (
-            <>
-              <p className="text-muted-foreground mb-4">Nessun risultato trovato per "{searchQuery}".</p>
-              <Link href="/favorite" className="text-primary text-sm hover:underline">
-                Torna a tutti i documenti
-              </Link>
-            </>
-          ) : (
-             <p className="text-muted-foreground">Non hai ancora nessun documento.</p>
-          )}
+    <Suspense fallback={<div className="p-8 text-center">Caricamento...</div>}>
+      <div className="p-8">
+        <div className="mb-8 flex items-center justify-between">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            {searchQuery ? `Risultati per "${searchQuery}" tra i tuoi preferiti` : 'I miei Preferiti'}
+          </h1>
+          <div><ViewToggle /></div>
         </div>
-      ) : (
-        <DocumentList documents={documents} currentView={currentView} />
-      )}
-    </div>
+    
+        {documents.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center border rounded-xl bg-muted/20 border-dashed">
+            {searchQuery ? (
+              <>
+                <p className="text-muted-foreground mb-4">Nessun risultato trovato per "{searchQuery}".</p>
+                <Link href="/favorite" className="text-primary text-sm hover:underline">
+                  Torna a tutti i documenti
+                </Link>
+              </>
+            ) : (
+               <p className="text-muted-foreground">Non hai ancora nessun documento.</p>
+            )}
+          </div>
+        ) : (
+          <DocumentList documents={documents} currentView={currentView} />
+        )}
+      </div>
+    </Suspense>
   )
 }
