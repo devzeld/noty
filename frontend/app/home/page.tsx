@@ -11,7 +11,7 @@ async function getDocuments(query: string = "") {
   if (!token) return [];
 
   try {
-    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost/noty/backend/src/' }document.php${query ? `?q=${encodeURIComponent(query)}` : ''}`;
+    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost/noty/backend/src/'}document.php${query ? `?q=${encodeURIComponent(query)}` : ''}`;
     
     const res = await fetch(url, {
       method: 'GET',
@@ -82,8 +82,10 @@ export default function Home({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Caricamento documenti...</div>}>
-      <HomeContent searchParams={searchParams} />
-    </Suspense>
+    <div className="flex-1">
+      <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Caricamento documenti...</div>}>
+        <HomeContent searchParams={searchParams} />
+      </Suspense>
+    </div>
   );
 }
