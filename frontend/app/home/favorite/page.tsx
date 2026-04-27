@@ -83,8 +83,10 @@ export default function FavoritePage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Caricamento preferiti...</div>}>
-      <FavoriteContent searchParams={searchParams} />
-    </Suspense>
+    <div className="flex-1">
+      <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Caricamento preferiti...</div>}>
+        <FavoriteContent searchParams={searchParams} />
+      </Suspense>
+    </div>
   )
 }
