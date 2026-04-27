@@ -2,7 +2,6 @@ import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { ViewToggle } from '@/components/view-toggle';
 import { DocumentList } from '@/components/document-list';
-import { Suspense } from 'react';
 
 async function getDocuments(query: string = "") {
   const cookieStore = await cookies();
@@ -49,7 +48,6 @@ export default async function Home({
   const documents = await getDocuments(searchQuery);
 
   return (
-    <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Caricamento documenti...</div>}>
       <div className="p-8">
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">
@@ -75,6 +73,5 @@ export default async function Home({
         <DocumentList documents={documents} currentView={currentView} />
       )}
     </div>
-    </Suspense>
   );
 }

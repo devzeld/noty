@@ -2,7 +2,6 @@ import { DocumentList } from "@/components/document-list"
 import { ViewToggle } from "@/components/view-toggle"
 import { cookies } from "next/headers"
 import Link from "next/link"
-import { Suspense } from "react"
 
 async function getTrashedDocuments(query: string = "") {
   const cookieStore = await cookies()
@@ -49,7 +48,6 @@ export default async function Trash({
   const documents = await getTrashedDocuments(searchQuery)
   
   return (
-    <Suspense fallback={<div className="p-8 text-center">Caricamento...</div>}>
       <div className="p-8">
         <div className="mb-8 flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
@@ -57,7 +55,7 @@ export default async function Trash({
           </h1>
           <div><ViewToggle /></div>
         </div>
-    
+
         {documents.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center border rounded-xl bg-muted/20 border-dashed">
             {searchQuery ? (
@@ -75,6 +73,5 @@ export default async function Trash({
           <DocumentList documents={documents} currentView={currentView} />
         )}
       </div>
-    </Suspense>
   )
 }

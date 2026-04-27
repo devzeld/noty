@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { HomeSidebar } from '@/components/sidebar';
@@ -96,9 +96,11 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
 
           </header>
     
-          <div className="flex-1 overflow-y-auto">
-            {children}
-          </div>
+          <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Caricamento...</div>}>
+            <div className="flex-1 overflow-y-auto">
+              {children}
+            </div>
+          </Suspense>
 
         </main>
       </SidebarProvider>
