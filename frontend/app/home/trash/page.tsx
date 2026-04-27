@@ -2,6 +2,7 @@ import { DocumentList } from "@/components/document-list"
 import { ViewToggle } from "@/components/view-toggle"
 import { cookies } from "next/headers"
 import Link from "next/link"
+import { Suspense } from "react"
 
 async function getTrashedDocuments(query: string = "") {
   const cookieStore = await cookies()
@@ -35,7 +36,7 @@ async function getTrashedDocuments(query: string = "") {
   }
 }
 
-export default async function Trash({
+async function TrashContent({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
@@ -73,5 +74,17 @@ export default async function Trash({
           <DocumentList documents={documents} currentView={currentView} />
         )}
       </div>
+  )
+}
+
+export default function Trash({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Caricamento cestino...</div>}>
+      <TrashContent searchParams={searchParams} />
+    </Suspense>
   )
 }

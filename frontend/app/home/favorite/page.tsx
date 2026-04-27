@@ -2,6 +2,7 @@ import { DocumentList } from "@/components/document-list"
 import { ViewToggle } from "@/components/view-toggle"
 import { cookies } from "next/headers"
 import Link from "next/link"
+import { Suspense } from "react"
 
 async function getFavoriteDocuments(query: string = "") {
   const cookieStore = await cookies()
@@ -35,7 +36,7 @@ async function getFavoriteDocuments(query: string = "") {
   }
 }
 
-export default async function Favorite({
+async function FavoriteContent({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
@@ -73,5 +74,17 @@ export default async function Favorite({
           <DocumentList documents={documents} currentView={currentView} />
         )}
       </div>
+  )
+}
+
+export default function FavoritePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Caricamento preferiti...</div>}>
+      <FavoriteContent searchParams={searchParams} />
+    </Suspense>
   )
 }

@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { ViewToggle } from '@/components/view-toggle';
 import { DocumentList } from '@/components/document-list';
+import { Suspense } from 'react';
 
 async function getDocuments(query: string = "") {
   const cookieStore = await cookies();
@@ -35,13 +36,12 @@ async function getDocuments(query: string = "") {
   }
 }
 
-export default async function Home({
+async function HomeContent({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const resolvedParams = await searchParams;
-  
   const searchQuery = typeof resolvedParams.q === 'string' ? resolvedParams.q : "";
   const currentView = typeof resolvedParams.view === 'string' ? resolvedParams.view : "grid";
 
@@ -73,5 +73,17 @@ export default async function Home({
         <DocumentList documents={documents} currentView={currentView} />
       )}
     </div>
+  );
+}
+
+export default function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Caricamento documenti...</div>}>
+      <HomeContent searchParams={searchParams} />
+    </Suspense>
   );
 }

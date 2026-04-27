@@ -74,13 +74,11 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
         <HomeSidebar/>
         
         <main className="flex-1 overflow-hidden flex flex-col bg-background">
-          
           <header className='sticky top-0 z-10 flex h-14 justify-between items-center gap-4 border-b bg-background px-4'>
-            
             <div className="flex items-center gap-2 lg:hidden">
                <SidebarTrigger variant="outline"/>
             </div>
-            
+
             <div className="flex-1 max-w-md hidden md:block">
               <TopSearch/>
             </div>
@@ -93,15 +91,11 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
                 </AvatarFallback>
               </Avatar>
             </Link>
-
           </header>
-    
-          <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Caricamento...</div>}>
-            <div className="flex-1 overflow-y-auto">
-              {children}
-            </div>
-          </Suspense>
 
+          <div className="flex-1 overflow-y-auto">
+              {children}
+          </div>
         </main>
       </SidebarProvider>
     </TooltipProvider>
