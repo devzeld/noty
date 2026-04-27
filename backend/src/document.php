@@ -37,8 +37,8 @@ switch ($method) {
 
             echo json_encode(["data" => $doc]);
         } else {
-            $folderId = isset($_GET["folder_id"]) ? (int) $_GET["folder_id"] : null;
-            $search   = isset($_GET["q"]) ? "%" . trim($_GET["q"]) . "%" : null;
+            $folderId = $_GET["folder_id"] ?? null;
+            $search = isset($_GET["q"]) ? "%" . trim($_GET["q"]) . "%" : null;
             $areFavorite = isset($_GET["fav"]) ? (bool) $_GET["fav"] : null;
             $areDeleted = isset($_GET["trashed"]) ? (bool) $_GET["trashed"] : null;
 
@@ -49,9 +49,11 @@ switch ($method) {
 
             $params = [":uid" => $userId];
 
-            if ($folderId !== null) {
+            if ($folderId === "null") {
+                $sql .= " AND d.folder_id IS NULL";
+            } elseif ($folderId !== null) {
                 $sql .= " AND d.folder_id = :fid";
-                $params[":fid"] = $folderId;
+                $params[":fid"] = (int) $folderId;
             }
             if ($search) {
                 $sql .= " AND (d.title LIKE :q OR d.content LIKE :q)";

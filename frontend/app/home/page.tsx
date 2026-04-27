@@ -1,89 +1,105 @@
 import { cookies } from 'next/headers';
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { ViewToggle } from '@/components/view-toggle';
 import { DocumentList } from '@/components/document-list';
-import { Suspense } from 'react';
+import { FolderList } from '@/components/folder-list';
+import { ArrowLeft } from 'lucide-react';
 
-async function getDocuments(query: string = "") {
+async function getDirectoryContent(folderId: string | null, query: string = "") {
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value;
+  if (!token) return { folders: [], documents: [] };
 
-  if (!token) return [];
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost/noty/backend/src/';
+  const headers = { 'Cookie': `token=${token}`, 'Authorization': `Bearer ${token}` };
 
   try {
-    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost/noty/backend/src/'}document.php${query ? `?q=${encodeURIComponent(query)}` : ''}`;
-    
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Cookie': `token=${token}`,
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      cache: 'no-store' 
-    });
-
-    if (!res.ok) {
-      console.error("Errore dal PHP:", await res.text());
-      return [];
+    if (query) {
+      const res = await fetch(`${baseUrl}document.php?q=${encodeURIComponent(query)}`, { headers, cache: 'no-store' });
+      const json = await res.json();
+      return { folders: [], documents: json.data || [] };
     }
 
-    const json = await res.json();
-    return json.data || [];
+    if (folderId) {
+      const res = await fetch(`${baseUrl}folder.php?id=${folderId}`, { headers, cache: 'no-store' });
+      const json = await res.json();
+      return {
+        folders: json.data?.folders || [],
+        documents: json.data?.documents || []
+      };
+    }
+    
+    const [fRes, dRes] = await Promise.all([
+      fetch(`${baseUrl}folder.php`, { headers, cache: 'no-store' }),
+      fetch(`${baseUrl}document.php?folder_id=null`, { headers, cache: 'no-store' }) 
+    ]);
+
+    const fJson = await fRes.json();
+    const dJson = await dRes.json();
+
+    return {
+      folders: fJson.data || [],
+      documents: dJson.data || []
+    };
+
   } catch (error) {
-    console.error("Errore fetch documenti (Node.js):", error);
-    return [];
+    console.error("Errore fetch dati:", error);
+    return { folders: [], documents: [] };
   }
 }
 
-async function HomeContent({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-}) {
+async function HomeContent({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const resolvedParams = await searchParams;
   const searchQuery = typeof resolvedParams.q === 'string' ? resolvedParams.q : "";
   const currentView = typeof resolvedParams.view === 'string' ? resolvedParams.view : "grid";
+  const folderId = typeof resolvedParams.folder_id === 'string' ? resolvedParams.folder_id : null;
 
-  const documents = await getDocuments(searchQuery);
+  const { folders, documents } = await getDirectoryContent(folderId, searchQuery);
 
   return (
-      <div className="p-8">
+    <div className="p-8">
       <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          {searchQuery ? `Risultati per "${searchQuery}"` : 'I miei Documenti'}
-        </h1>
-        <div><ViewToggle /></div>
+        <div className="flex items-center gap-4">
+          {folderId && !searchQuery && (
+            <Link href="/home" className="p-2 border rounded-md hover:bg-muted transition">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+          )}
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            {searchQuery ? `Risultati per "${searchQuery}"` : (folderId ? 'Contenuto Cartella' : 'I miei File')}
+          </h1>
+        </div>
+        <div>
+          <ViewToggle />
+        </div>
       </div>
 
-      {documents.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center border rounded-xl bg-muted/20 border-dashed">
-          {searchQuery ? (
-            <>
-              <p className="text-muted-foreground mb-4">Nessun risultato trovato per "{searchQuery}".</p>
-              <Link href="/home" className="text-primary text-sm hover:underline">
-                Torna a tutti i documenti
-              </Link>
-            </>
-          ) : (
-             <p className="text-muted-foreground">Non hai ancora nessun documento.</p>
-          )}
+      {!searchQuery && folders.length > 0 && (
+        <div className="mb-10">
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">Cartelle</h2>
+          <FolderList folders={folders} />
         </div>
-      ) : (
-        <DocumentList documents={documents} currentView={currentView} />
       )}
+
+      <div>
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">Documenti</h2>
+        {documents.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center border rounded-xl bg-muted/20 border-dashed">
+            <p className="text-muted-foreground">Nessun documento qui.</p>
+          </div>
+        ) : (
+          <DocumentList documents={documents} currentView={currentView} />
+        )}
+      </div>
     </div>
   );
 }
 
-export default function Home({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-}) {
+export default function Home({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   return (
     <div className="flex-1">
-      <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Caricamento documenti...</div>}>
+      <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Caricamento esplora risorse...</div>}>
         <HomeContent searchParams={searchParams} />
       </Suspense>
     </div>
