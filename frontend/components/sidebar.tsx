@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Home, Star, Settings, NotebookPen, Plus, Trash, Loader } from "lucide-react"
+import { Home, Star, Settings, NotebookPen, Plus, Trash, Loader, FolderPlus, StickyNote } from "lucide-react"
 
 import {
   Sidebar,
@@ -15,9 +15,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { Button } from "./ui/button"
 import { createDocumentAction } from "@/lib/actions/document-action"
 import { useState } from "react"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem} from "./ui/dropdown-menu"
+import { createFolderAction } from "@/lib/actions/folder-action"
 
 const mainItems = [
   { title: "Home", url: "/home", icon: Home },
@@ -38,17 +39,31 @@ export default function SidebarPage() {
 
 export function HomeSidebar() {
   const pathname = usePathname()
-  
+
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
 
-  const handleCreate = async () => {
+  const handleCreateDocument = async () => {
     try {
       setIsPending(true);
 
-      const newDocId = await createDocumentAction();
+      const newDocId = await createDocumentAction("Nuovo Documento");
       
       router.push(`/editor/${newDocId}`);
+    } catch (error) {
+      console.error("Errore durante la creazione:", error);
+      alert("Impossibile creare il documento. Riprova.");
+      setIsPending(false);
+    }
+  };
+
+  const handleCreateFolder = async () => {
+    try {
+      setIsPending(true);
+
+      const newFolderId = await createFolderAction("Nuova Cartella", "TODO");
+      
+      router.push(`?folder_id=${newFolderId}`);
     } catch (error) {
       console.error("Errore durante la creazione:", error);
       alert("Impossibile creare il documento. Riprova.");
@@ -73,20 +88,28 @@ export function HomeSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton 
-                  onClick={handleCreate} 
-                  disabled={isPending} 
-                  className="w-full justify-start gap-2" 
-                  variant="outline" 
-                  size="default"
-                >
                   {isPending ? (
-                    <Loader className="h-4 w-4 animate-spin" />
+                    <Loader className="h-4 w-4 animate-spin"/>
                   ) : (
-                    <Plus className="h-4 w-4" />
+                    <DropdownMenu modal={false}>
+                      <DropdownMenuTrigger asChild className="w-full">
+                        <SidebarMenuButton variant="outline" className="flex items-center w-full">
+                          <Plus className="h-4 w-4" />
+                          <span>Nuovo</span>
+                        </SidebarMenuButton>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" className="w-full">
+                        <DropdownMenuItem onClick={handleCreateDocument}>
+                          <StickyNote className="mr-2 h-4 w-4" />
+                          <span>Nuovo Documento</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleCreateFolder}>
+                          <FolderPlus className="mr-2 h-4 w-4" />
+                          <span>Nuova Cartella</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   )}
-                  {isPending ? 'Creazione...' : 'Nuovo Documento'}
-                </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
