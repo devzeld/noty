@@ -52,7 +52,7 @@ async function getDirectoryContent(folderId: string | null, query: string = "") 
 async function HomeContent({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const resolvedParams = await searchParams;
   const searchQuery = typeof resolvedParams.q === 'string' ? resolvedParams.q : "";
-  const currentView = typeof resolvedParams.view === 'string' ? resolvedParams.view : "grid";
+  const currentView = typeof resolvedParams.view === 'string' ? resolvedParams.view : "list";
   const folderId = typeof resolvedParams.folder_id === 'string' ? resolvedParams.folder_id : null;
 
   const { folders, documents } = await getDirectoryContent(folderId, searchQuery);

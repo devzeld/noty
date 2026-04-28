@@ -17,7 +17,7 @@ export function FolderList({ folders }: { folders: FolderType[] }) {
     const router = useRouter();
     
     function handleOpening(folderId: string | number): void {
-        router.push(`/editor/${folderId}`);
+        router.push(`?folder_id=${folderId}`);
     }
 
   return (

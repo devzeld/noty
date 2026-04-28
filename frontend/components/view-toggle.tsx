@@ -8,7 +8,7 @@ export function ViewToggle() {
   const searchParams = useSearchParams()
   const pathname = usePathname()
   
-  const currentView = searchParams.get("view") || "grid"
+  const currentView = searchParams.get("view") || "list"
 
   const setView = (view: string) => {
     const params = new URLSearchParams(searchParams.toString())

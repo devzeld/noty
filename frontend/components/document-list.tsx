@@ -9,7 +9,7 @@ import {
   CardDescription, 
   CardFooter 
 } from '@/components/ui/card'; 
-import { Table, TableRow, TableCell, TableHeader, TableBody, TableFooter, TableHead} from '@/components/ui/table';
+import { Table, TableRow, TableCell, TableHeader, TableBody, TableHead} from '@/components/ui/table';
 
 type Document = {
   id: string | number;
