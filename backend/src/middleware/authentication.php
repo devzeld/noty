@@ -96,6 +96,12 @@ class Auth
             $stmt->execute([$username, $email, $hash]);
             $userId = (int)$this->db->lastInsertId();
 
+            $stmt = $this->db->prepare("INSERT INTO profiles (user_id, avatar_url) VALUES (?, ?)");
+            $stmt->execute([$userId, null]);
+
+            $stmt = $this->db->prepare("INSERT INTO settings (user_id) VALUES (?)");
+            $stmt->execute([$userId]);
+
             return ["success" => true, "user_id" => $userId];
         } catch (PDOException $e) {
             return ["success" => false, "error" => "Errore interno durante la registrazione", "code" => 500];

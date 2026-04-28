@@ -13,8 +13,6 @@ type UserProfile = {
   username: string;
   display_name: string;
   avatar_url: string;
-  theme_preference: string;
-  language: string;
 };
 
 export default function HomeLayout({ children }: { children: React.ReactNode }) {
@@ -49,9 +47,7 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
         setProfile({
           username: data.username,
           display_name: data.display_name,
-          avatar_url: data.avatar_url,
-          theme_preference: data.theme_preference,
-          language: data.language
+          avatar_url: data.avatar_url
         });
       } catch (error) {
         console.error(error);

@@ -15,7 +15,7 @@ try {
             $stmt = $db->prepare("
                 SELECT 
                     a.id, a.username, a.email, a.created_at,
-                    p.display_name, p.avatar_url, p.theme_preference, p.language
+                    p.display_name, p.avatar_url
                 FROM accounts a
                 LEFT JOIN profiles p ON a.id = p.user_id
                 WHERE a.id = ? AND a.deleted_at IS NULL
@@ -29,8 +29,6 @@ try {
             }
 
             $profile['display_name'] = $profile['display_name'] ?? $profile['username'];
-            $profile['theme_preference'] = $profile['theme_preference'] ?? 'light';
-            $profile['language'] = $profile['language'] ?? 'it';
 
             echo json_encode(["data" => $profile]);
             break;
@@ -40,19 +38,15 @@ try {
 
             $displayName = isset($body['display_name']) ? trim($body['display_name']) : null;
             $avatarUrl = isset($body['avatar_url']) ? trim($body['avatar_url']) : null;
-            $theme = isset($body['theme_preference']) ? trim($body['theme_preference']) : 'light';
-            $language = isset($body['language']) ? trim($body['language']) : 'it';
 
-            $sql = "INSERT INTO profiles (user_id, display_name, avatar_url, theme_preference, language) 
-                    VALUES (?, ?, ?, ?, ?)
+            $sql = "INSERT INTO profiles (user_id, display_name, avatar_url) 
+                    VALUES (?, ?, ?)
                     ON DUPLICATE KEY UPDATE 
                         display_name = VALUES(display_name),
-                        avatar_url = VALUES(avatar_url),
-                        theme_preference = VALUES(theme_preference),
-                        language = VALUES(language)";
+                        avatar_url = VALUES(avatar_url)";
 
             $stmt = $db->prepare($sql);
-            $stmt->execute([$userId, $displayName, $avatarUrl, $theme, $language]);
+            $stmt->execute([$userId, $displayName, $avatarUrl]);
 
             if (isset($body['email'])) {
                 $newEmail = trim($body['email']);

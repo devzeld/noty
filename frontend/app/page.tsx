@@ -21,11 +21,8 @@ export default function LandingPage() {
             <span className="text-xl font-bold tracking-tight">{t.nav.title}</span>
           </div>
           <nav className="flex items-center gap-4">
-        
             <LanguageSwitcher /> 
-
             <ThemeSwitcher/>
-            
             <Link href="/auth">
               <Button variant="outline">{t.nav.login}</Button>
             </Link>

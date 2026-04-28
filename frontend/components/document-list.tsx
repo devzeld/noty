@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { StickyNote } from 'lucide-react';
+import { Star, StickyNote } from 'lucide-react';
 import { 
   Card, 
   CardHeader, 
@@ -32,40 +32,40 @@ export function DocumentList({
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="">
       {currentView === 'list' ? (
-        <Table className="flex flex-col gap-2">
+        <Table className="">
           <TableHeader>
-            <TableRow className="flex flex-row justify-between">
+            <TableRow className="">
               <TableHead>Tipo</TableHead>
               <TableHead>Nome</TableHead>
               <TableHead>Preferito</TableHead>
               <TableHead>Ultima modifica</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody className="flex flex-col gap-2">
+          <TableBody className="">
           {documents.map((doc) => {
             return (
               <TableRow 
                 key={doc.id}
                 onDoubleClick={() => handleOpening(doc.id)}
-                className={`group flex flex-row justify-between p-4 transition-all cursor-pointer shadow-sm hover:shadow`}
+                className=""
               >
                 <TableCell>
-                  <StickyNote className='h-5 w-5 text-blue-500 fill-blue-500/20 shrink-0'/>
+                  <StickyNote className="text-blue-500 fill-blue-500/20"/>
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-4 overflow-hidden">
-                    <span className="text-base truncate m-0 font-semibold">
+                  <div className="">
+                    <span className="">
                       {doc.title || 'Senza Titolo'}
                     </span>
                   </div>
                 </TableCell>
                 <TableCell>
                   {doc.favorite ? (
-                    <span className="text-sm text-yellow-500">Sì</span>
+                    <Star />
                   ) : (
-                    <span className="text-sm text-red-500">No</span>
+                    <Star className="text-muted-foreground" />
                   )}
                 </TableCell>
                 <TableCell>
@@ -74,7 +74,6 @@ export function DocumentList({
                   </span>
                 </TableCell>
               </TableRow>
-            
             );
           })}
           </TableBody>
