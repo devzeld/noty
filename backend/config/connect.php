@@ -19,7 +19,7 @@ class DBHandler
         $password = '';
 
         try {
-            $connection_string = 'mysql:host=localhost;dbname=noty;charset=utf8';
+            $connection_string = 'mysql:host=db;dbname=noty;charset=utf8';
             $connection_array = array(
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
