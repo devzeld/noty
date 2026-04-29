@@ -8,7 +8,7 @@ async function getInitialProfile() {
   if (!token) return null;
 
   try {
-    const res = await fetch('http://localhost/noty/backend/src/profile.php', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/profile.php`, {
       method: 'GET',
       headers: {
         'Cookie': `token=${token}`,

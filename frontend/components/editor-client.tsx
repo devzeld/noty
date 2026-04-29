@@ -34,7 +34,7 @@ export function EditorClient({ initialDocument }: { initialDocument: DocumentTyp
     const saveDocument = async () => {
       setStatus('saving');
       try {
-        const res = await fetch(`http://localhost/noty/backend/src/document.php?id=${initialDocument.id}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/document.php?id=${initialDocument.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include', 

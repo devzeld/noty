@@ -12,7 +12,7 @@ async function getSingleDocument(id: string) {
   if (!token) return null;
 
   try {
-    const res = await fetch(`http://localhost/noty/backend/src/document.php?id=${id}`, {
+    const res = await fetch(`${process.env.INTERNAL_API_URL}/document.php?id=${id}`, {
       method: 'GET',
       headers: {
         'Cookie': `token=${token}`,

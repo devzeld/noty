@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . "\..\middleware\bootstrap.php";
+require_once __DIR__ . "/../middleware/bootstrap.php";
 
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {

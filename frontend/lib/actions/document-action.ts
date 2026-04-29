@@ -8,9 +8,9 @@ export async function createDocumentAction(name: string): Promise<string | numbe
   
   if (!token) throw new Error('No token found');  
 
-  const url = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost/noty/backend/src/';
+  const baseUrl = process.env.INTERNAL_API_URL || "http://backend/src";
 
-  const res : Response = await fetch(`${url}document.php`, {
+  const res : Response = await fetch(`${baseUrl}/document.php`, {
     method: 'POST',
     headers: {
       'Cookie': `token=${token}`,
@@ -21,7 +21,11 @@ export async function createDocumentAction(name: string): Promise<string | numbe
     body: JSON.stringify({ title: name, content: "" })
   });
 
-  if (!res.ok) throw new Error('Failed to create document');
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("Errore Backend:", errorText);
+    throw new Error('Failed to create document');
+  }
 
   const json : {message: string, id: string | number} = await res.json();
   

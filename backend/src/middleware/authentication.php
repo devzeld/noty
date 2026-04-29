@@ -1,5 +1,5 @@
 <?php
-require_once ROOT . "\config\connect.php";
+require_once ROOT . "/config/connect.php";
 
 class Auth
 {

@@ -22,7 +22,7 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     const refreshSession = async () => {
       try {
-        const res = await fetch('http://localhost/noty/backend/src/auth/refresh.php', { 
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/refresh.php`, { 
           method: 'POST',
           credentials: 'include', 
         });
@@ -34,7 +34,7 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
 
     const getProfile = async () => {
       try {
-        const res = await fetch('http://localhost/noty/backend/src/profile.php', { 
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/profile.php`, { 
           method: 'GET',
           credentials: 'include', 
         });

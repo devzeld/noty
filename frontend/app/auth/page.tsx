@@ -25,7 +25,7 @@ export default function AuthPage() {
     setSuccessMsg('')
 
     const endpoint = isLogin ? 'login.php' : 'register.php'
-    const url = `http://localhost/noty/backend/src/auth/${endpoint}`
+    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/${endpoint}`
 
     const payload = isLogin 
       ? { identifier, password } 

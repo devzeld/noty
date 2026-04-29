@@ -1,20 +1,18 @@
 <?php
 $allowed_origins = [
     'http://localhost:3000',
-    'https://noty.zeld.space' // questo è il mio dominio
+    'https://noty.zeld.space'
 ];
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
 if (in_array($origin, $allowed_origins)) {
     header("Access-Control-Allow-Origin: $origin");
-} else {
-    header("Access-Control-Allow-Origin: *");
+    header("Access-Control-Allow-Credentials: true");
 }
 
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Access-Control-Allow-Credentials: true");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, Cookie");
 header("Content-Type: application/json");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {

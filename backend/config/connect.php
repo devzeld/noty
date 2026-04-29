@@ -16,7 +16,7 @@ class DBHandler
     private static function connect_database()
     {
         $user = 'root';
-        $password = '';
+        $password = 'root'; 
 
         try {
             $connection_string = 'mysql:host=db;dbname=noty;charset=utf8';
@@ -26,7 +26,10 @@ class DBHandler
             );
             self::$pdo = new PDO($connection_string, $user, $password, $connection_array);
         } catch (PDOException $e) {
-            self::$pdo = null;
+            die(json_encode([
+                "success" => false, 
+                "error" => "Connessione DB fallita: " . $e->getMessage()
+            ]));
         }
     }
 }

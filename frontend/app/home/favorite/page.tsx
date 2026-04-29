@@ -11,9 +11,7 @@ async function getFavoriteDocuments(query: string = "") {
   if (!token) return []
 
   try {
-    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost/noty/backend/src' }document.php?fav=true${query ? `&q=${encodeURIComponent(query)}` : ''}`
-    
-    const res = await fetch(url, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/document.php?fav=true${query ? `&q=${encodeURIComponent(query)}` : ''}`, {
       method: 'GET',
       headers: {
         'Cookie': `token=${token}`,

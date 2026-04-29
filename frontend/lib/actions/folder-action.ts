@@ -8,9 +8,9 @@ export async function createFolderAction(name: string, parent_folder_id: string)
   
   if (!token) throw new Error('No token found');  
 
-  const url = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost/noty/backend/src/';
+  const baseUrl = process.env.INTERNAL_API_URL || "http://backend/src";
 
-  const res : Response = await fetch(`${url}folder.php`, {
+  const res : Response = await fetch(`${baseUrl}/folder.php`, {
     method: 'POST',
     headers: {
       'Cookie': `token=${token}`,

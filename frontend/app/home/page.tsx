@@ -11,18 +11,17 @@ async function getDirectoryContent(folderId: string | null, query: string = "") 
   const token = cookieStore.get('token')?.value;
   if (!token) return { folders: [], documents: [] };
 
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost/noty/backend/src/';
   const headers = { 'Cookie': `token=${token}`, 'Authorization': `Bearer ${token}` };
 
   try {
     if (query) {
-      const res = await fetch(`${baseUrl}document.php?q=${encodeURIComponent(query)}`, { headers, cache: 'no-store' });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/document.php?q=${encodeURIComponent(query)}`, { headers, cache: 'no-store' });
       const json = await res.json();
       return { folders: [], documents: json.data || [] };
     }
 
     if (folderId) {
-      const res = await fetch(`${baseUrl}folder.php?id=${folderId}`, { headers, cache: 'no-store' });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/folder.php?id=${folderId}`, { headers, cache: 'no-store' });
       const json = await res.json();
       return {
         folders: json.data?.folders || [],
@@ -30,9 +29,13 @@ async function getDirectoryContent(folderId: string | null, query: string = "") 
       };
     }
     
+    const baseUrl = typeof window === 'undefined' 
+      ? process.env.INTERNAL_API_URL 
+      : process.env.NEXT_PUBLIC_API_BASE_URL;
+
     const [fRes, dRes] = await Promise.all([
-      fetch(`${baseUrl}folder.php`, { headers, cache: 'no-store' }),
-      fetch(`${baseUrl}document.php?folder_id=null`, { headers, cache: 'no-store' }) 
+      fetch(`${baseUrl}/folder.php`, { headers, cache: 'no-store' }),
+      fetch(`${baseUrl}/document.php?folder_id=null`, { headers, cache: 'no-store' }) 
     ]);
 
     const fJson = await fRes.json();
