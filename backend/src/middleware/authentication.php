@@ -95,7 +95,7 @@ class Auth
             $stmt = $this->db->prepare("INSERT INTO accounts (username, email, password_hash) VALUES (?, ?, ?)");
             $stmt->execute([$username, $email, $hash]);
             $userId = (int)$this->db->lastInsertId();
-
+            //TODO: add trasaction
             $stmt = $this->db->prepare("INSERT INTO profiles (user_id, avatar_url) VALUES (?, ?)");
             $stmt->execute([$userId, null]);
 
