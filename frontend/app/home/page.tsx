@@ -15,13 +15,13 @@ async function getDirectoryContent(folderId: string | null, query: string = "") 
 
   try {
     if (query) {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/document.php?q=${encodeURIComponent(query)}`, { headers, cache: 'no-store' });
+      const res = await fetch(`${process.env.INTERNAL_API_URL }/document.php?q=${encodeURIComponent(query)}`, { headers, cache: 'no-store' });
       const json = await res.json();
       return { folders: [], documents: json.data || [] };
     }
 
     if (folderId) {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/folder.php?id=${folderId}`, { headers, cache: 'no-store' });
+      const res = await fetch(`${process.env.INTERNAL_API_URL }/folder.php?id=${folderId}`, { headers, cache: 'no-store' });
       const json = await res.json();
       return {
         folders: json.data?.folders || [],

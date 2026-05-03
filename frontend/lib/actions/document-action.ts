@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 
-export async function createDocumentAction(name: string): Promise<string | number> {
+export async function createDocumentAction(name: string, folder_id: string | null): Promise<string | number> {
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value;
   
@@ -18,7 +18,7 @@ export async function createDocumentAction(name: string): Promise<string | numbe
       'Content-Type': 'application/json'
     },
     cache: 'no-store',
-    body: JSON.stringify({ title: name, content: "" })
+    body: JSON.stringify({ title: name, content: "", folder_id: folder_id})
   });
 
   if (!res.ok) {

@@ -21,7 +21,7 @@ switch ($method) {
     case "PUT":
         $body = json_decode(file_get_contents("php://input"), true);
         $username = isset($body["username"]) ? trim($body["username"]) : null;
-        $email = isset($body["email"])    ? trim($body["email"])    : null;
+        $email = isset($body["email"]) ? trim($body["email"]) : null;
 
         if ($username === null && $email === null) {
             http_response_code(400);

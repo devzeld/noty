@@ -11,7 +11,7 @@ async function getTrashedDocuments(query: string = "") {
   if (!token) return []
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/document.php?trashed=true${query ? `&q=${encodeURIComponent(query)}` : ''}`, {
+    const res = await fetch(`${process.env.INTERNAL_API_URL}/document.php?trashed=true${query ? `&q=${encodeURIComponent(query)}` : ''}`, {
       method: 'GET',
       headers: {
         'Cookie': `token=${token}`,
