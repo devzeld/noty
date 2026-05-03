@@ -92,18 +92,27 @@ class Auth
         $hash = password_hash($password, PASSWORD_BCRYPT, ["cost" => 12]);
 
         try {
+            $this->db->beginTransaction();
+
             $stmt = $this->db->prepare("INSERT INTO accounts (username, email, password_hash) VALUES (?, ?, ?)");
             $stmt->execute([$username, $email, $hash]);
             $userId = (int)$this->db->lastInsertId();
-            //TODO: add trasaction
+            
             $stmt = $this->db->prepare("INSERT INTO profiles (user_id, avatar_url) VALUES (?, ?)");
             $stmt->execute([$userId, null]);
 
             $stmt = $this->db->prepare("INSERT INTO settings (user_id) VALUES (?)");
             $stmt->execute([$userId]);
 
-            return ["success" => true, "user_id" => $userId];
+            $this->db->commit();
+
+            return $this->attempt($username, $password);
+            
         } catch (PDOException $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            error_log("Errore in registrazione transazione: " . $e->getMessage());
             return ["success" => false, "error" => "Errore interno durante la registrazione", "code" => 500];
         }
     }
@@ -152,7 +161,7 @@ class Auth
             "token" => $token,
             "expires_at" => $expiresAt,
             "user" => [
-                "id" => (int)$account["id"],
+                "id" => (int) $account["id"],
                 "username" => $account["username"],
                 "email" => $account["email"]
             ]

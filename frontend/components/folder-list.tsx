@@ -1,8 +1,6 @@
 'use client';
 
 import { Folder } from 'lucide-react';
-import router from 'next/dist/shared/lib/router/router';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle } from './ui/card';
 

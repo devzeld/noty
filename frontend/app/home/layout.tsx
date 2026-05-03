@@ -2,12 +2,15 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { SidebarMenuButton, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { HomeSidebar } from '@/components/sidebar';
 import { TopSearch } from '@/components/search';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { LayoutDashboard, LogOut, User } from 'lucide-react';
+import { logoutAction } from '@/lib/actions/auth-action';
 
 type UserProfile = {
   username: string;
@@ -17,6 +20,7 @@ type UserProfile = {
 
 export default function HomeLayout({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [isPending, setIsPending] = useState(false);
   const pathname = usePathname(); 
 
   useEffect(() => {
@@ -64,6 +68,16 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
 
   }, [pathname]);
 
+  const handleLogout = async () => {
+      try {
+        setIsPending(true);
+        await logoutAction();
+      } catch (error) {
+        console.error("Errore durante il logout:", error);
+        setIsPending(false);
+      }
+    };
+
   return (
     <TooltipProvider>
       <SidebarProvider className="flex h-screen bg-background">
@@ -83,14 +97,29 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
               </Suspense>
             </div>
     
-            <Link className="ml-auto" href="/home/profile">
-              <Avatar className="cursor-pointer hover:opacity-80 transition-opacity">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Avatar className="cursor-pointer hover:opacity-80 transition-opacity">
                 <AvatarImage src={profile?.avatar_url} alt="User avatar" />
                 <AvatarFallback>
                   {profile?.username ? profile.username[0].toUpperCase() : 'U'}
                 </AvatarFallback>
               </Avatar>
-            </Link>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="top" align="start" className="w-56">            
+                <DropdownMenuItem asChild className="cursor-pointer">
+                    <Link href="/home/profile" className="flex items-center">
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      <span>Dashboard</span>
+                    </Link>
+                  </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-100 dark:focus:bg-red-950">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Esci</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
           </header>
     
@@ -103,3 +132,4 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
     </TooltipProvider>
   );
 }
+

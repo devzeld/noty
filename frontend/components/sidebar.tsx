@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { Home, Star, Settings, NotebookPen, Plus, Trash, Loader, FolderPlus, StickyNote, Check } from "lucide-react"
+import { Home, Star, Settings, NotebookPen, Plus, Trash, Loader, FolderPlus, StickyNote, Check, User, LayoutDashboard, LogOut } from "lucide-react"
 import { useState } from "react"
 
 import {
@@ -16,13 +16,14 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem} from "./ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator} from "./ui/dropdown-menu"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
 import { createDocumentAction } from "@/lib/actions/document-action"
 import { createFolderAction, getFoldersAction } from "@/lib/actions/folder-action"
+import { logoutAction } from "@/lib/actions/auth-action"
 
 const mainItems = [
   { title: "Home", url: "/home", icon: Home },

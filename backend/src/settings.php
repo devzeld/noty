@@ -12,14 +12,15 @@ $method = $_SERVER["REQUEST_METHOD"];
 try {
     switch ($method) {
         case "GET":
-            $stmt = $db->prepare("SELECT notifications_enabled FROM settings WHERE user_id = ?");
+            $stmt = $db->prepare("SELECT theme_preference, language FROM settings WHERE user_id = ?");
             $stmt->execute([$userId]);
             $settings = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$settings) {
-                $settings = ["notifications_enabled" => true];
-            } else {
-                $settings["notifications_enabled"] = (bool) $settings["notifications_enabled"];
+                $settings = [
+                    "theme_preference" => "light",
+                    "language" => "it"
+                ];
             }
 
             echo json_encode(["success" => true, "data" => $settings]);
@@ -28,15 +29,17 @@ try {
         case "PUT":
             $body = json_decode(file_get_contents("php://input"), true);
 
-            $notificationsEnabled = isset($body['notifications_enabled']) ? (int) filter_var($body['notifications_enabled'], FILTER_VALIDATE_BOOLEAN) : 1;
+            $themePreference = isset($body['theme_preference']) ? trim($body['theme_preference']) : 'light';
+            $language = isset($body['language']) ? trim($body['language']) : 'it';
 
-            $sql = "INSERT INTO settings (user_id, notifications_enabled) 
-                    VALUES (?, ?)
+            $sql = "INSERT INTO settings (user_id, theme_preference, language) 
+                    VALUES (?, ?, ?)
                     ON DUPLICATE KEY UPDATE 
-                        notifications_enabled = VALUES(notifications_enabled)";
+                        theme_preference = VALUES(theme_preference),
+                        language = VALUES(language)";
 
             $stmt = $db->prepare($sql);
-            $stmt->execute([$userId, $notificationsEnabled]);
+            $stmt->execute([$userId, $themePreference, $language]);
 
             echo json_encode(["success" => true, "message" => "Impostazioni aggiornate con successo"]);
             break;

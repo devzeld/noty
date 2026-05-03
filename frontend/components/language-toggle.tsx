@@ -1,6 +1,6 @@
 "use client"
 
-import { useLanguage } from "@/hooks/useLanguage"
+import { useLanguage } from "@/hooks/use-language"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,

@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useLanguage } from "@/hooks/useLanguage"
+import { useLanguage } from "@/hooks/use-language"
 import { LanguageSwitcher } from "@/components/language-toggle"
 import { Button } from "@/components/ui/button"
 import { NotebookPen, ArrowRight, Cloud, Shield, Zap } from "lucide-react"

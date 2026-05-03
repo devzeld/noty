@@ -40,7 +40,12 @@ export default async function Profile() {
   }
 
   return (
-    <div className="p-4 md:p-8 w-full max-w-5xl mx-auto">      
+    <div className="p-4 md:p-8 w-full max-w-5xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold">Profilo</h1>
+        <p className="text-muted-foreground mt-2">Personalizza il tuo profilo personale.</p>
+      </div>
+
       <ProfileForm initialData={profileData} />
     </div>
   );

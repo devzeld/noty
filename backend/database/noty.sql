@@ -22,7 +22,6 @@ CREATE TABLE profiles(
 
 CREATE TABLE settings (
     user_id INT NOT NULL PRIMARY KEY,
-    notifications_enabled BOOLEAN DEFAULT TRUE,
     theme_preference VARCHAR(20) DEFAULT 'light',
     language VARCHAR(10) DEFAULT 'it',
     CONSTRAINT FOREIGN KEY (user_id) REFERENCES accounts (id) ON DELETE CASCADE

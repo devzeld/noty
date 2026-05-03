@@ -15,7 +15,7 @@ try {
             $stmt = $db->prepare("
                 SELECT 
                     a.id, a.username, a.email, a.created_at,
-                    p.display_name, p.avatar_url
+                    p.display_name, p.avatar_url, p.bio
                 FROM accounts a
                 LEFT JOIN profiles p ON a.id = p.user_id
                 WHERE a.id = ? AND a.deleted_at IS NULL
@@ -38,15 +38,17 @@ try {
 
             $displayName = isset($body['display_name']) ? trim($body['display_name']) : null;
             $avatarUrl = isset($body['avatar_url']) ? trim($body['avatar_url']) : null;
+            $bio = isset($body['bio']) ? trim($body['bio']) : null;
 
-            $sql = "INSERT INTO profiles (user_id, display_name, avatar_url) 
-                    VALUES (?, ?, ?)
+            $sql = "INSERT INTO profiles (user_id, display_name, avatar_url, bio) 
+                    VALUES (?, ?, ?, ?)
                     ON DUPLICATE KEY UPDATE 
                         display_name = VALUES(display_name),
-                        avatar_url = VALUES(avatar_url)";
+                        avatar_url = VALUES(avatar_url),
+                        bio = VALUES(bio)";
 
             $stmt = $db->prepare($sql);
-            $stmt->execute([$userId, $displayName, $avatarUrl]);
+            $stmt->execute([$userId, $displayName, $avatarUrl, $bio]);
 
             if (isset($body['email'])) {
                 $newEmail = trim($body['email']);
