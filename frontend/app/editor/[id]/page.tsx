@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Star, StarOff } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { EditorClient } from '@/components/editor-client';
 import { Suspense } from 'react';
 

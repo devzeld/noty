@@ -34,7 +34,7 @@ services:
     depends_on:
       - db
 
-  frontend:
+  ffrontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -47,6 +47,8 @@ services:
     environment:
       - NEXT_PUBLIC_API_BASE_URL=http://localhost:8080/src/
       - INTERNAL_API_URL=http://backend/src/
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
     depends_on:
       - backend
 

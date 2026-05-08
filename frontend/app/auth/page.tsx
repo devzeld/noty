@@ -47,8 +47,9 @@ export default function AuthPage() {
 
     setLoading(true);
 
+    const baseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || '').replace(/\/$/, '');
     const endpoint = isLogin ? 'login.php' : 'register.php';
-    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/${endpoint}`;
+    const url = `${baseUrl}/auth/${endpoint}`;
 
     const payload = isLogin 
       ? { identifier: formData.identifier, password: formData.password } 
@@ -62,14 +63,22 @@ export default function AuthPage() {
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
+      const responseText = await res.text();
+      let data;
+
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("ERRORE DAL PHP (NON JSON):", responseText);
+        throw new Error("Errore critico dal server (probabile Database vuoto o mancante). Apri la console (F12) per i dettagli.");
+      }
 
       if (!res.ok || data.success === false) {
         throw new Error(data.error || 'Errore durante la richiesta');
       }
 
       if (isLogin) {
-        router.replace('/home');
+        window.location.href = '/home';
       } else {
         setSuccessMsg('Registrazione completata! Ora puoi accedere.');
         setIsLogin(true); 

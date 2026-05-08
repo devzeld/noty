@@ -1,7 +1,6 @@
 <?php
 require_once __DIR__ . "/../middleware/bootstrap.php";
 
-
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     http_response_code(405);
     exit(json_encode(["error" => "Metodo non consentito"]));
@@ -32,7 +31,7 @@ $result = $auth->register($username, $email, $password);
 
 if ($result["success"]) {
     http_response_code(201);
-    echo json_encode(["message" => "Account creato con successo", "user_id" => $result["user_id"]]);
+    echo json_encode(["success" => true, "message" => "Account creato con successo"]);
 } else {
     http_response_code($result["code"]);
     echo json_encode(["error" => $result["error"]]);

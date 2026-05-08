@@ -176,9 +176,9 @@ class Auth
         $stmt->execute([$this->token]);
 
         setcookie("token", "", [
-            "expires"  => time() - 3600,
-            "path"     => "/",
-            "secure"   => false,
+            "expires" => time() - 3600,
+            "path" => "/",
+            "secure" => false,
             "httponly" => true,
         ]);
 

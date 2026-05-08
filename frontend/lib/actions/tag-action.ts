@@ -11,10 +11,7 @@ export async function getTagsAction() {
 
   const res = await fetch(`${getBaseUrl()}/tag.php`, {
     method: 'GET',
-    headers: {
-      'Cookie': `token=${token}`,
-      'Authorization': `Bearer ${token}`
-    },
+    headers: { 'Cookie': `token=${token}`, 'Authorization': `Bearer ${token}` },
     cache: 'no-store'
   });
 
@@ -40,4 +37,18 @@ export async function createTagAction(name: string, color: string) {
 
   if (!res.ok) throw new Error('Failed to create tag');
   return await res.json();
+}
+
+export async function deleteTagAction(id: number) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('token')?.value;
+  if (!token) throw new Error('No token found');
+
+  const res = await fetch(`${getBaseUrl()}/tag.php?id=${id}`, {
+    method: 'DELETE',
+    headers: { 'Cookie': `token=${token}`, 'Authorization': `Bearer ${token}` }
+  });
+
+  if (!res.ok) throw new Error('Failed to delete tag');
+  return true;
 }
