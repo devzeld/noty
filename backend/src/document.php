@@ -44,8 +44,7 @@ switch ($method) {
 
             $sql = "SELECT d.id, d.folder_id, d.title, d.created_at, d.updated_at, d.favorite
                     FROM documents d
-                    WHERE d.deleted_at IS NULL
-                      AND d.owner_id = :uid";
+                    WHERE d.owner_id = :uid";
 
             $params = [":uid" => $userId];
 
@@ -66,6 +65,8 @@ switch ($method) {
 
             if ($areDeleted !== null) {
                 $sql .= " AND d.deleted_at IS " . ($areDeleted ? "NOT NULL" : "NULL");
+            } else {
+                $sql .= " AND d.deleted_at IS NULL";
             }
 
             $sql .= " ORDER BY d.updated_at DESC";
@@ -117,7 +118,7 @@ switch ($method) {
             exit(json_encode(["error" => "ID documento obbligatorio"]));
         }
 
-        $stmt = $db->prepare("SELECT * FROM documents WHERE id = ? AND owner_id = ? AND deleted_at IS NULL");
+        $stmt = $db->prepare("SELECT * FROM documents WHERE id = ? AND owner_id = ?");
         $stmt->execute([$docId, $userId]);
         $doc = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -128,15 +129,25 @@ switch ($method) {
 
         $body = json_decode(file_get_contents("php://input"), true);
 
+        $restore = isset($body["restore"]) && $body["restore"] === true;
+        if ($restore) {
+            $db->prepare("UPDATE documents SET deleted_at = NULL WHERE id = ? AND owner_id = ?")
+               ->execute([$docId, $userId]);
+            echo json_encode(["message" => "Documento ripristinato"]);
+            break;
+        }
+
         $title = isset($body["title"])   ? trim($body["title"])  : $doc["title"];
-        $content = isset($body["content"]) ? $body["content"]      : $doc["content"];
+        $content = isset($body["content"]) ? $body["content"] : $doc["content"];
         $folderId = array_key_exists("folder_id", $body) ? ($body["folder_id"] ? (int) $body["folder_id"] : null) : $doc["folder_id"];
+        
+        $favorite = isset($body["favorite"]) ? (int) (bool) $body["favorite"] : $doc["favorite"];
         $tagIds = $body["tag_ids"] ?? null;
 
         $db->prepare(
-            "UPDATE documents SET title = ?, content = ?, folder_id = ?, updated_at = NOW()
+            "UPDATE documents SET title = ?, content = ?, folder_id = ?, favorite = ?, updated_at = NOW()
              WHERE id = ? AND owner_id = ?"
-        )->execute([$title, $content, $folderId, $docId, $userId]);
+        )->execute([$title, $content, $folderId, $favorite, $docId, $userId]);
 
         if ($tagIds !== null) {
             $db->prepare("DELETE FROM doc_tags WHERE doc_id = ?")->execute([$docId]);
@@ -156,12 +167,18 @@ switch ($method) {
             http_response_code(400);
             exit(json_encode(["error" => "ID documento obbligatorio"]));
         }
-
-        $db->prepare(
-            "UPDATE documents SET deleted_at = NOW() WHERE id = ? AND owner_id = ?"
-        )->execute([$docId, $userId]);
-
-        echo json_encode(["message" => "Documento eliminato"]);
+        
+        $permanent = isset($_GET["permanent"]) && $_GET["permanent"] === "1";
+        
+        if ($permanent) {
+            $db->prepare("DELETE FROM documents WHERE id = ? AND owner_id = ?")
+               ->execute([$docId, $userId]);
+            echo json_encode(["message" => "Documento eliminato definitivamente"]);
+        } else {
+            $db->prepare("UPDATE documents SET deleted_at = NOW() WHERE id = ? AND owner_id = ?")
+               ->execute([$docId, $userId]);
+            echo json_encode(["message" => "Documento spostato nel cestino"]);
+        }
         break;
 
     default:

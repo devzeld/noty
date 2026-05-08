@@ -69,7 +69,7 @@ async function TrashContent({
             )}
           </div>
         ) : (
-          <DocumentList documents={documents} currentView={currentView} />
+          <DocumentList documents={documents} currentView={currentView} isTrash={true} />
         )}
       </div>
   )

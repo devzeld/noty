@@ -52,3 +52,18 @@ export async function getFoldersAction() {
   const data = await res.json();
   return data; 
 }
+
+export async function deleteFolderAction(id: string | number) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('token')?.value;
+  if (!token) throw new Error('No token found');
+
+  const baseUrl = process.env.INTERNAL_API_URL || "http://backend/src";
+  const res = await fetch(`${baseUrl}/folder.php?id=${id}`, {
+    method: 'DELETE',
+    headers: { 'Cookie': `token=${token}`, 'Authorization': `Bearer ${token}` }
+  });
+
+  if (!res.ok) throw new Error('Failed to delete folder');
+  return true;
+}

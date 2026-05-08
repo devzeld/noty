@@ -10,7 +10,7 @@ export async function logoutAction() {
   if (token) {
     const baseUrl = process.env.INTERNAL_API_URL || "http://backend/src";
     
-    await fetch(`${baseUrl}/logout.php`, {
+    await fetch(`${baseUrl}/auth/logout.php`, {
       method: 'POST',
       headers: {
         'Cookie': `token=${token}`,

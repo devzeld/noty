@@ -110,6 +110,14 @@ switch ($method) {
         $folder = requireFolder($db, $folderId, $userId);
         $body = json_decode(file_get_contents("php://input"), true);
 
+        $restore = isset($body["restore"]) && $body["restore"] === true;
+        if ($restore) {
+            $db->prepare("UPDATE folders SET deleted_at = NULL WHERE id = ?")
+               ->execute([$folderId]);
+            echo json_encode(["message" => "Cartella ripristinata"]);
+            break;
+        }
+
         $name = isset($body["name"]) ? trim($body["name"]) : $folder["name"];
         $parentId = array_key_exists("parent_folder_id", $body)
             ? ($body["parent_folder_id"] ? (int) $body["parent_folder_id"] : null)
@@ -144,15 +152,16 @@ switch ($method) {
 
         requireFolder($db, $folderId, $userId);
 
-        $db->prepare(
-            "UPDATE documents SET folder_id = NULL WHERE folder_id = ?"
-        )->execute([$folderId]);
-
-        $db->prepare(
-            "UPDATE folders SET deleted_at = NOW() WHERE id = ?"
-        )->execute([$folderId]);
-
-        echo json_encode(["message" => "Cartella eliminata"]);
+        $permanent = isset($_GET["permanent"]) && $_GET["permanent"] === "1";
+        
+        if ($permanent) {
+            $db->prepare("DELETE FROM folders WHERE id = ?")->execute([$folderId]);
+            echo json_encode(["message" => "Cartella eliminata definitivamente"]);
+        } else {
+            $db->prepare("UPDATE documents SET folder_id = NULL WHERE folder_id = ?")->execute([$folderId]);
+            $db->prepare("UPDATE folders SET deleted_at = NOW() WHERE id = ?")->execute([$folderId]);
+            echo json_encode(["message" => "Cartella spostata nel cestino"]);
+        }
         break;
 
     default:

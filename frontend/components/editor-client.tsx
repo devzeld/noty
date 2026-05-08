@@ -5,15 +5,24 @@ import ReactMarkdown from 'react-markdown';
 import { 
   Cloud, CloudAlert, Loader, 
   Heading1, Heading2, Bold, Italic, List, 
-  Eye, Edit3
+  Eye, Edit3, Tags
 } from 'lucide-react';
 import { Button } from '@/components/ui/button'; 
+import { updateDocumentAction } from '@/lib/actions/document-action';
+import { getTagsAction } from '@/lib/actions/tag-action';
 
 type DocumentType = {
   id: string | number;
   title: string;
   content: string;
   updated_at: string;
+  tags?: { id: number; name: string; color: string }[];
+};
+
+type TagType = {
+  id: number;
+  name: string;
+  color: string;
 };
 
 export function EditorClient({ initialDocument }: { initialDocument: DocumentType }) {
@@ -22,9 +31,18 @@ export function EditorClient({ initialDocument }: { initialDocument: DocumentTyp
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   
   const [view, setView] = useState<'edit' | 'preview'>('edit');
+  const [availableTags, setAvailableTags] = useState<TagType[]>([]);
+  const [selectedTags, setSelectedTags] = useState<number[]>(
+    initialDocument.tags?.map(t => t.id) || []
+  );
+  const [showTags, setShowTags] = useState(false);
 
   const isMounted = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    getTagsAction().then(tags => setAvailableTags(tags));
+  }, []);
 
   useEffect(() => {
     if (!isMounted.current) {
@@ -34,13 +52,7 @@ export function EditorClient({ initialDocument }: { initialDocument: DocumentTyp
     const saveDocument = async () => {
       setStatus('saving');
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/document.php?id=${initialDocument.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include', 
-          body: JSON.stringify({ title, content })
-        });
-        if (!res.ok) throw new Error('Salvataggio fallito');
+        await updateDocumentAction(initialDocument.id, { title, content });
         setStatus('saved');
         setTimeout(() => setStatus('idle'), 2000); 
       } catch (error) {
@@ -74,9 +86,25 @@ export function EditorClient({ initialDocument }: { initialDocument: DocumentTyp
     }, 0);
   };
 
+  const toggleTag = async (tagId: number) => {
+    setStatus('saving');
+    const newTags = selectedTags.includes(tagId) 
+      ? selectedTags.filter(id => id !== tagId) 
+      : [...selectedTags, tagId];
+    
+    setSelectedTags(newTags);
+    
+    try {
+      await updateDocumentAction(initialDocument.id, { tag_ids: newTags });
+      setStatus('saved');
+      setTimeout(() => setStatus('idle'), 2000); 
+    } catch (error) {
+      setStatus('error');
+    }
+  };
+
   return (
     <div className="flex flex-col h-full max-w-4xl mx-auto w-full p-8 relative">
-      
       <div className="absolute top-4 right-8 flex items-center gap-2 text-sm text-muted-foreground">
         {status === 'saving' && <><Loader className="h-4 w-4 animate-spin" /> Salvataggio...</>}
         {status === 'saved' && <><Cloud className="h-4 w-4 text-green-500" /> Salvato</>}
@@ -88,70 +116,70 @@ export function EditorClient({ initialDocument }: { initialDocument: DocumentTyp
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Titolo del documento"
-        className="text-4xl font-bold mb-6 outline-none bg-transparent placeholder:text-muted-foreground/50 border-none focus:ring-0 w-full"
+        className="text-4xl font-bold mb-4 outline-none bg-transparent placeholder:text-muted-foreground/50 border-none focus:ring-0 w-full"
       />
 
+      <div className="flex items-center gap-2 mb-6 relative">
+        <Button variant="outline" size="sm" onClick={() => setShowTags(!showTags)}>
+          <Tags className="w-4 h-4 mr-2" /> Tag
+        </Button>
+        <div className="flex gap-2">
+          {availableTags.filter(t => selectedTags.includes(t.id)).map(tag => (
+            <span key={tag.id} className="px-2 py-1 text-xs rounded-full border font-medium" style={{ backgroundColor: `${tag.color}20`, color: tag.color, borderColor: tag.color }}>
+              {tag.name}
+            </span>
+          ))}
+        </div>
+
+        {showTags && (
+          <div className="absolute top-10 left-0 bg-popover border shadow-md rounded-md p-2 w-48 z-10">
+            {availableTags.length === 0 ? (
+               <p className="text-xs text-muted-foreground p-2">Nessun tag disponibile</p>
+            ) : (
+               availableTags.map(tag => (
+                 <label key={tag.id} className="flex items-center gap-2 p-2 hover:bg-muted rounded cursor-pointer">
+                   <input 
+                     type="checkbox" 
+                     checked={selectedTags.includes(tag.id)} 
+                     onChange={() => toggleTag(tag.id)} 
+                   />
+                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: tag.color }} />
+                   <span className="text-sm">{tag.name}</span>
+                 </label>
+               ))
+            )}
+          </div>
+        )}
+      </div>
+
       <div className="flex items-center justify-between border-b pb-4 mb-4">
+        {/* ... (Il resto dei bottoni markdown e il toggle preview rimangono inalterati come nel tuo codice originale) ... */}
         <div className="flex gap-1">
-          <Button 
-            variant="ghost" size="sm" 
-            onClick={() => insertMarkdown('# ', '')} 
-            disabled={view === 'preview'} title="Titolo 1"
-          >
+          <Button variant="ghost" size="sm" onClick={() => insertMarkdown('# ', '')} disabled={view === 'preview'} title="Titolo 1">
             <Heading1 className="h-4 w-4" />
           </Button>
-          <Button 
-            variant="ghost" size="sm" 
-            onClick={() => insertMarkdown('## ', '')} 
-            disabled={view === 'preview'} title="Titolo 2"
-          >
+          <Button variant="ghost" size="sm" onClick={() => insertMarkdown('## ', '')} disabled={view === 'preview'} title="Titolo 2">
             <Heading2 className="h-4 w-4" />
           </Button>
-
           <div className="w-px h-6 bg-border mx-1 self-center" />
-
-          <Button 
-            variant="ghost" size="sm" 
-            onClick={() => insertMarkdown('**', '**')} 
-            disabled={view === 'preview'} title="Grassetto"
-          >
+          <Button variant="ghost" size="sm" onClick={() => insertMarkdown('**', '**')} disabled={view === 'preview'} title="Grassetto">
             <Bold className="h-4 w-4" />
           </Button>
-          <Button 
-            variant="ghost" size="sm" 
-            onClick={() => insertMarkdown('*', '*')} 
-            disabled={view === 'preview'} title="Corsivo"
-          >
+          <Button variant="ghost" size="sm" onClick={() => insertMarkdown('*', '*')} disabled={view === 'preview'} title="Corsivo">
             <Italic className="h-4 w-4" />
           </Button>
           <div className="w-px h-6 bg-border mx-1 self-center" />
-          <Button 
-            variant="ghost" size="sm" 
-            onClick={() => insertMarkdown('- ', '')} 
-            disabled={view === 'preview'} title="Lista puntata"
-          >
+          <Button variant="ghost" size="sm" onClick={() => insertMarkdown('- ', '')} disabled={view === 'preview'} title="Lista puntata">
             <List className="h-4 w-4" />
           </Button>
         </div>
 
         <div className="flex bg-muted/50 p-1 rounded-lg border">
-          <Button
-            variant={view === 'edit' ? 'default' : 'ghost'}
-            size="sm"
-            className="h-7 px-3 text-xs"
-            onClick={() => setView('edit')}
-          >
-            <Edit3 className="h-3 w-3 mr-2" />
-            Editor
+          <Button variant={view === 'edit' ? 'default' : 'ghost'} size="sm" className="h-7 px-3 text-xs" onClick={() => setView('edit')}>
+            <Edit3 className="h-3 w-3 mr-2" /> Editor
           </Button>
-          <Button
-            variant={view === 'preview' ? 'default' : 'ghost'}
-            size="sm"
-            className="h-7 px-3 text-xs"
-            onClick={() => setView('preview')}
-          >
-            <Eye className="h-3 w-3 mr-2" />
-            Preview
+          <Button variant={view === 'preview' ? 'default' : 'ghost'} size="sm" className="h-7 px-3 text-xs" onClick={() => setView('preview')}>
+            <Eye className="h-3 w-3 mr-2" /> Preview
           </Button>
         </div>
       </div>
@@ -167,7 +195,7 @@ export function EditorClient({ initialDocument }: { initialDocument: DocumentTyp
           />
         ) : (
           <div className="w-full min-h-[500px] text-lg leading-relaxed">
-            <ReactMarkdown
+             <ReactMarkdown
               components={{
                 h1: ({node, ...props}) => <h1 className="text-3xl font-bold mt-6 mb-4" {...props} />,
                 h2: ({node, ...props}) => <h2 className="text-2xl font-bold mt-5 mb-3" {...props} />,

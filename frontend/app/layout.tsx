@@ -10,8 +10,8 @@ const jetbrainsMonoHeading = JetBrains_Mono({subsets:['latin'],variable:'--font-
 const roboto = Roboto({subsets:['latin'],variable:'--font-sans'})
 
 export const metadata: Metadata = {
-  title: "Noty",
-  description: "",
+  title: "Noty - La tua dashboard di appunti",
+  description: " Noty è un'applicazione web per prendere appunti in modo semplice e organizzato. Crea, gestisci e condividi i tuoi appunti con facilità.",
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

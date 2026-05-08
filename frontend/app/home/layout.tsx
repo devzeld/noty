@@ -2,14 +2,14 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { SidebarMenuButton, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { HomeSidebar } from '@/components/sidebar';
 import { TopSearch } from '@/components/search';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { LayoutDashboard, LogOut, User } from 'lucide-react';
+import { LayoutDashboard, LogOut } from 'lucide-react';
 import { logoutAction } from '@/lib/actions/auth-action';
 
 type UserProfile = {
@@ -24,15 +24,21 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname(); 
 
   useEffect(() => {
-    const refreshSession = async () => {
+    const refreshSession = async () : Promise<Boolean> => {
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/refresh.php`, { 
           method: 'POST',
           credentials: 'include', 
         });
-        if (!res.ok) console.warn("Refresh fallito: sessione probabilmente scaduta.");
+        if (!res.ok) {
+          console.warn("Refresh fallito: sessione probabilmente scaduta.");
+          return false;
+        }
+
+        return true;
       } catch (error) {
         console.error(error);
+        return false;
       }
     };
 
@@ -60,8 +66,14 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
     };
 
     const initializeLayout = async () => {
-      await refreshSession();
-      await getProfile();
+      const success = await refreshSession();
+  
+      if (success) {
+          await getProfile();
+      } else {
+          setProfile(null);
+          window.location.href = "/auth";
+      }
     };
 
     initializeLayout();
