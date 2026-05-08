@@ -64,7 +64,6 @@ export function DocumentList({
             <TableRow className="">
               <TableHead>Tipo</TableHead>
               <TableHead>Nome</TableHead>
-              {!isTrash && <TableHead>Preferito</TableHead>}
               <TableHead>Ultima modifica</TableHead>
               <TableHead className="text-right">Azioni</TableHead>
             </TableRow>
@@ -78,11 +77,6 @@ export function DocumentList({
               >
                 <TableCell><StickyNote className="text-blue-500 fill-blue-500/20"/></TableCell>
                 <TableCell><span>{doc.title || 'Senza Titolo'}</span></TableCell>
-                {!isTrash && (
-                  <TableCell>
-                    {doc.favorite ? <Star className="text-yellow-500 fill-yellow-500 w-4 h-4" /> : <Star className="text-muted-foreground w-4 h-4" />}
-                  </TableCell>
-                )}
                 <TableCell>
                   <span>{new Date(doc.updated_at).toLocaleString('it-IT', { day: 'numeric', month: 'long'})}</span>
                 </TableCell>

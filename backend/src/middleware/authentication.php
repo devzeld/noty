@@ -152,8 +152,10 @@ class Auth
         setcookie("token", $token, [
             "expires"  => $expiresAtTimestamp,
             "path"     => "/",
+            "domain"   => "",
             "secure"   => false,
             "httponly" => true,
+            "samesite" => "Lax"
         ]);
 
         return [
