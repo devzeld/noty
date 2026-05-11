@@ -11,6 +11,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { LayoutDashboard, LogOut } from 'lucide-react';
 import { logoutAction } from '@/lib/actions/auth-action';
+import { ThemeProvider } from '@/components/theme-provider';
 
 type UserProfile = {
   username: string;
@@ -91,7 +92,8 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
     };
 
   return (
-    <TooltipProvider>
+    <ThemeProvider>
+      <TooltipProvider>
       <SidebarProvider className="flex h-screen bg-background">
         <HomeSidebar/>
         
@@ -142,6 +144,7 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
         </main>
       </SidebarProvider>
     </TooltipProvider>
+    </ThemeProvider>
   );
 }
 

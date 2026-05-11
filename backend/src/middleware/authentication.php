@@ -155,7 +155,6 @@ class Auth
             "domain"   => "",
             "secure"   => false,
             "httponly" => true,
-            "samesite" => "Lax"
         ]);
 
         return [

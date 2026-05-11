@@ -7,7 +7,6 @@ import { Search } from "lucide-react"
 export function TopSearch() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const pathname = usePathname()
 
   const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "")
 

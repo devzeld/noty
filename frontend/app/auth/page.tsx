@@ -1,13 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { NotebookPen, ArrowLeft, Loader2, Eye, EyeOff } from 'lucide-react';
 
 export default function AuthPage() {
-  const router = useRouter();
-  
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);

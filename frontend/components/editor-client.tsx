@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button'; 
 import { updateDocumentAction } from '@/lib/actions/document-action';
 import { getTagsAction, createTagAction, deleteTagAction } from '@/lib/actions/tag-action';
+import { Badge } from '@/components/ui/badge';
 
 type DocumentType = {
   id: string | number;
@@ -36,7 +37,7 @@ export function EditorClient({ initialDocument }: { initialDocument: DocumentTyp
   const [showTags, setShowTags] = useState(false);
   
   const [newTagName, setNewTagName] = useState("");
-  const [newTagColor, setNewTagColor] = useState("#3b82f6"); // Default blu
+  const [newTagColor, setNewTagColor] = useState("#3b82f6");
   const [isCreatingTag, setIsCreatingTag] = useState(false);
 
   const isMounted = useRef(false);
@@ -128,7 +129,7 @@ export function EditorClient({ initialDocument }: { initialDocument: DocumentTyp
     e.stopPropagation();
     if(confirm('Vuoi eliminare definitivamente questo tag? Verrà rimosso da tutti i documenti.')) {
         await deleteTagAction(tagId);
-        // Rimuovilo dai selezionati se lo era
+
         setSelectedTags(prev => prev.filter(id => id !== tagId));
         await loadTags();
     }
@@ -156,9 +157,9 @@ export function EditorClient({ initialDocument }: { initialDocument: DocumentTyp
         </Button>
         <div className="flex gap-2 flex-wrap">
           {availableTags.filter(t => selectedTags.includes(t.id)).map(tag => (
-            <span key={tag.id} className="px-2 py-1 text-xs rounded-full border font-medium" style={{ backgroundColor: `${tag.color}20`, color: tag.color, borderColor: tag.color }}>
+            <Badge key={tag.id} style={{ backgroundColor: `${tag.color}20`, color: tag.color, borderColor: tag.color }}>
               {tag.name}
-            </span>
+            </Badge>
           ))}
         </div>
 
@@ -183,7 +184,6 @@ export function EditorClient({ initialDocument }: { initialDocument: DocumentTyp
               )}
             </div>
 
-            {/* FORM CREAZIONE NUOVO TAG */}
             <div className="border-t pt-3 flex flex-col gap-2">
               <span className="text-xs font-semibold text-muted-foreground">Crea Nuovo Tag</span>
               <div className="flex gap-2 items-center">

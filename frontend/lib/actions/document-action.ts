@@ -85,3 +85,7 @@ export async function hardDeleteDocumentAction(id: string | number) {
 export async function toggleFavoriteAction(id: string | number, isFavorite: boolean) {
   return updateDocumentAction(id, { favorite: !isFavorite });
 }
+
+export async function moveDocumentAction(docId: string | number, folderId: string | number | null) {
+  return updateDocumentAction(docId, { folder_id: folderId });
+}

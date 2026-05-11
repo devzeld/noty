@@ -48,6 +48,15 @@ function wouldCreateCycle(PDO $db, int $folderId, int $newParentId): bool
 switch ($method) {
 
     case "GET":
+        if (isset($_GET["all"]) && $_GET["all"] === "1") {
+            $stmt = $db->prepare(
+                "SELECT * FROM folders WHERE user_id = ? AND deleted_at IS NULL ORDER BY name ASC"
+            );
+            $stmt->execute([$userId]);
+            echo json_encode(["data" => $stmt->fetchAll()]);
+            exit;
+        }
+
         if ($folderId) {
             requireFolder($db, $folderId, $userId);
 

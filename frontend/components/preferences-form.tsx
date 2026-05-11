@@ -4,19 +4,20 @@ import { useState } from 'react';
 import { Loader, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes"
 
 type SettingsData = {
   theme_preference: string;
-  language: string;
 };
 
 export function PreferencesForm({ initialData }: { initialData: SettingsData }) {
+  const { setTheme } = useTheme();
+
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
   const [formData, setFormData] = useState({
-    theme_preference: initialData.theme_preference || "light",
-    language: initialData.language || "it",
+    theme_preference: initialData.theme_preference || "light"
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
@@ -44,6 +45,7 @@ export function PreferencesForm({ initialData }: { initialData: SettingsData }) 
       
       setMessage({ text: "Preferenze aggiornate!", type: 'success' });
       setTimeout(() => setMessage(null), 4000);
+      setTheme(formData.theme_preference);
     } catch (error) {
       setMessage({ text: "Impossibile aggiornare le preferenze.", type: 'error' });
     } finally {
@@ -73,18 +75,6 @@ export function PreferencesForm({ initialData }: { initialData: SettingsData }) 
                 <option value="light">Chiaro</option>
                 <option value="dark">Scuro</option>
                 <option value="system">Usa impostazioni di sistema</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="language" className="text-sm font-medium leading-none">Lingua</label>
-              <select 
-                id="language" name="language" 
-                value={formData.language} onChange={handleChange}
-                className={`${inputClass} mt-2`}
-              >
-                <option value="it">Italiano</option>
-                <option value="en">English</option>
               </select>
             </div>
           </div>
