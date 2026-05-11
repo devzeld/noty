@@ -24,6 +24,7 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
   const { setTheme } = useTheme();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [isPending, setIsPending] = useState(false);
   const pathname = usePathname(); 
 
   useEffect(() => {
