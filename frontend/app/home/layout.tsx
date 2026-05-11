@@ -12,6 +12,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { LayoutDashboard, LogOut } from 'lucide-react';
 import { logoutAction } from '@/lib/actions/auth-action';
 import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";
 
 type UserProfile = {
   username: string;
@@ -20,8 +21,9 @@ type UserProfile = {
 };
 
 export default function HomeLayout({ children }: { children: React.ReactNode }) {
+  const { setTheme } = useTheme();
+
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isPending, setIsPending] = useState(false);
   const pathname = usePathname(); 
 
   useEffect(() => {
@@ -84,6 +86,7 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
   const handleLogout = async () => {
       try {
         setIsPending(true);
+        setTheme("system");
         await logoutAction();
       } catch (error) {
         console.error("Errore durante il logout:", error);
